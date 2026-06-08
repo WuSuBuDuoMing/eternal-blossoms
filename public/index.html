@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>永恒花海 · 花海记忆 | ETERNAL BLOSSOMS</title>
+  <meta name="description" content="ETERNAL BLOSSOMS — HUA HAI JI YI — 一个沉浸式 3D 照片卡片画廊，用粒子和光为你编织永恒的花海记忆。">
+
+  <!-- Three.js (本地) -->
+  <script src="js/vendor/three.min.js"></script>
+
+  <!-- 主样式 -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Favicon（内联 SVG） -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+</head>
+<body>
+
+  <!-- ========== 加载画面 ========== -->
+  <div id="loader" class="loader">
+    <div class="loader-inner">
+      <div class="loader-emoji">🌸</div>
+      <h2 class="loader-title">永恒花海</h2>
+      <p class="loader-subtitle">ETERNAL BLOSSOMS</p>
+      <div class="loader-bar-track">
+        <div id="loader-bar" class="loader-bar"></div>
+      </div>
+      <p id="loader-status" class="loader-status">正在编织花海 ...</p>
+    </div>
+  </div>
+
+  <!-- ========== 粒子画布（Canvas 2D） ========== -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- ========== Three.js 3D 画布 ========== -->
+  <canvas id="three-canvas"></canvas>
+
+  <!-- ========== UI 覆盖层 ========== -->
+
+  <!-- 左上角 Logo -->
+  <div id="ui-logo" class="ui-logo">
+    <a href="/" style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);margin-right:12px;transition:all 0.2s;font-family:monospace" onmouseover="this.style.color='rgba(255,255,255,0.7)';this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.borderColor='rgba(255,255,255,0.1)'">← 首页</a>
+    <span class="logo-prefix">WXY</span>
+    <span class="logo-divider"></span>
+    <span class="logo-main">ETERNAL BLOSSOMS</span>
+    <span class="logo-sub">HUA HAI JI YI</span>
+  </div>
+
+  <!-- 右上角阶段信息 -->
+  <div id="ui-stage" class="ui-stage">
+    <div class="stage-name-zh" id="stage-name-zh">晨曦初临</div>
+    <div class="stage-name-en" id="stage-name-en">ARRIVAL</div>
+    <div class="stage-progress" id="stage-progress">0%</div>
+  </div>
+
+  <!-- 顶部进度条 -->
+  <div class="ui-progress-track">
+    <div id="ui-progress-bar" class="ui-progress-bar"></div>
+  </div>
+
+  <!-- 底部操作提示 -->
+  <div id="ui-hint" class="ui-hint">
+    <span>滚动探索花海</span>
+    <span class="hint-separator">|</span>
+    <span>拖拽旋转视角</span>
+    <span class="hint-separator">|</span>
+    <span>双击查看记忆</span>
+  </div>
+
+  <!-- 场景模式切换器 -->
+  <div id="scene-switcher" class="scene-switcher">
+    <div class="scene-switcher__label">场景模式</div>
+    <div class="scene-switcher__list">
+      <button class="scene-btn scene-btn--active" data-mode="bloom">
+        <span class="scene-btn__icon">🌺</span>
+        <span class="scene-btn__name">花海漫游</span>
+      </button>
+      <button class="scene-btn" data-mode="memory">
+        <span class="scene-btn__icon">📸</span>
+        <span class="scene-btn__name">记忆照片墙</span>
+      </button>
+      <button class="scene-btn" data-mode="starlight">
+        <span class="scene-btn__icon">✨</span>
+        <span class="scene-btn__name">星光告白</span>
+      </button>
+      <button class="scene-btn" data-mode="timeline">
+        <span class="scene-btn__icon">🕰️</span>
+        <span class="scene-btn__name">时间长廊</span>
+      </button>
+      <button class="scene-btn" data-mode="garden">
+        <span class="scene-btn__icon">🌿</span>
+        <span class="scene-btn__name">永恒花园</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 右下角 Constant Glow 开关 -->
+  <div id="ui-glow-toggle" class="ui-glow-toggle">
+    <button id="glow-btn" class="glow-btn" title="Constant Glow">
+      <svg class="glow-icon" viewBox="0 0 24 24" width="18" height="18">
+        <circle cx="12" cy="12" r="5" fill="currentColor"/>
+        <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </g>
+      </svg>
+      <span class="glow-label">CONSTANT GLOW</span>
+    </button>
+  </div>
+
+  <!-- 浮现诗句 -->
+  <div id="ui-poem" class="ui-poem">
+    <p id="poem-text" class="poem-text"></p>
+  </div>
+
+  <!-- ========== 卡片详情弹窗 ========== -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div id="modal-card" class="modal-card">
+      <button id="modal-close" class="modal-close" aria-label="关闭">&times;</button>
+      <div id="modal-emoji" class="modal-emoji"></div>
+      <h2 id="modal-title-zh" class="modal-title-zh"></h2>
+      <p id="modal-title-en" class="modal-title-en"></p>
+      <div class="modal-divider"></div>
+      <p id="modal-desc" class="modal-desc"></p>
+      <div id="modal-gradient-bar" class="modal-gradient-bar"></div>
+    </div>
+  </div>
+
+  <!-- ========== 脚本 ========== -->
+  <script src="js/particles.js"></script>
+  <script src="js/layouts.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

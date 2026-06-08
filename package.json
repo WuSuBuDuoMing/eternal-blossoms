@@ -1,0 +1,22 @@
+{
+  "name": "eternal-blossoms",
+  "version": "1.0.0",
+  "description": "永恒花海 - 花海记忆 (Eternal Blossoms) - 一个基于 Three.js 的沉浸式 3D 照片卡片画廊",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "threejs",
+    "3d",
+    "gallery",
+    "particles",
+    "interactive"
+  ],
+  "author": "Eternal Blossoms",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

@@ -1,0 +1,690 @@
+/* ============================================================
+   永恒花海 · 花海记忆 — 全局样式
+   ETERNAL BLOSSOMS — HUA HAI JI YI
+   ============================================================ */
+
+/* ---------- CSS 变量 ---------- */
+:root {
+  --color-bg: #0a0a12;
+  --color-bg-secondary: #12121e;
+  --color-text: #f0e6f6;
+  --color-text-muted: rgba(240, 230, 246, 0.5);
+  --color-accent: #ff6b9d;
+  --color-accent-secondary: #c084fc;
+  --color-gold: #ffd700;
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --font-display: 'Georgia', 'Noto Serif SC', 'SimSun', serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --shadow-glow: 0 0 40px rgba(255, 107, 157, 0.15);
+  --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- Reset ---------- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Canvas 层 ---------- */
+#particle-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+#three-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* ============================================================
+   加载画面
+   ============================================================ */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-inner {
+  text-align: center;
+}
+
+.loader-emoji {
+  font-size: 64px;
+  animation: loaderPulse 2s ease-in-out infinite;
+}
+
+@keyframes loaderPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+.loader-title {
+  margin-top: 24px;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 12px;
+  background: linear-gradient(135deg, #ff6b9d, #c084fc, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.loader-subtitle {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.loader-bar-track {
+  margin-top: 32px;
+  width: 240px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loader-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b9d, #c084fc);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.loader-status {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 2px;
+}
+
+/* ============================================================
+   UI Logo — 左上角
+   ============================================================ */
+.ui-logo {
+  position: fixed;
+  top: 28px;
+  left: 32px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+}
+
+.ui-logo.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.logo-prefix {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 3px;
+}
+
+.logo-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.logo-main {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   UI Stage — 右上角
+   ============================================================ */
+.ui-stage {
+  position: fixed;
+  top: 28px;
+  right: 32px;
+  z-index: 100;
+  text-align: right;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+}
+
+.ui-stage.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stage-name-zh {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: var(--color-text);
+}
+
+.stage-name-en {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.stage-progress {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 200;
+  color: var(--color-accent);
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+/* ============================================================
+   UI 进度条 — 顶部
+   ============================================================ */
+.ui-progress-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 200;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ui-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b9d, #c084fc, #ffd700, #ff6b9d);
+  background-size: 300% 100%;
+  animation: progressGradient 4s ease infinite;
+  transition: width 0.15s ease;
+  box-shadow: 0 0 12px rgba(255, 107, 157, 0.4);
+}
+
+@keyframes progressGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============================================================
+   UI 操作提示 — 底部
+   ============================================================ */
+.ui-hint {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+}
+
+.ui-hint.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.hint-separator {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================================
+   Constant Glow 开关 — 右下角
+   ============================================================ */
+.ui-glow-toggle {
+  position: fixed;
+  bottom: 28px;
+  right: 32px;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+}
+
+.ui-glow-toggle.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.glow-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--color-glass);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 100px;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 107, 157, 0.3);
+  color: var(--color-accent);
+}
+
+.glow-btn.active {
+  background: rgba(255, 107, 157, 0.12);
+  border-color: rgba(255, 107, 157, 0.4);
+  color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.15);
+}
+
+.glow-icon {
+  transition: transform 0.3s ease;
+}
+
+.glow-btn.active .glow-icon {
+  transform: rotate(45deg);
+  filter: drop-shadow(0 0 4px var(--color-accent));
+}
+
+/* ============================================================
+   浮现诗句
+   ============================================================ */
+.ui-poem {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  pointer-events: none;
+  text-align: center;
+  max-width: 600px;
+  padding: 0 40px;
+}
+
+.poem-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 2.2;
+  letter-spacing: 4px;
+  color: var(--color-text);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s var(--transition-smooth);
+  text-shadow: 0 0 40px rgba(255, 107, 157, 0.3);
+}
+
+.poem-text.visible {
+  opacity: 0.85;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   卡片详情弹窗
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  opacity: 0;
+  visibility: hidden;
+  transition: background 0.4s ease, backdrop-filter 0.4s ease, opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.modal-overlay.open {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  position: relative;
+  width: 380px;
+  max-width: 90vw;
+  padding: 48px 40px 36px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  transform: scale(0.9) translateY(30px);
+  transition: transform 0.5s var(--transition-smooth);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+}
+
+.modal-overlay.open .modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text);
+}
+
+.modal-emoji {
+  font-size: 56px;
+  margin-bottom: 20px;
+  animation: modalEmojiFloat 3s ease-in-out infinite;
+}
+
+@keyframes modalEmojiFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.modal-title-zh {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 6px;
+  color: var(--color-text);
+}
+
+.modal-title-en {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: var(--color-text-muted);
+}
+
+.modal-divider {
+  width: 40px;
+  height: 1px;
+  margin: 24px auto;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+}
+
+.modal-desc {
+  font-family: var(--font-display);
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+}
+
+.modal-gradient-bar {
+  margin-top: 28px;
+  height: 3px;
+  border-radius: 3px;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media (max-width: 768px) {
+  .ui-logo {
+    top: 16px;
+    left: 16px;
+  }
+
+  .logo-main {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .logo-sub {
+    display: none;
+  }
+
+  .ui-stage {
+    top: 16px;
+    right: 16px;
+  }
+
+  .stage-name-zh {
+    font-size: 13px;
+  }
+
+  .stage-progress {
+    font-size: 22px;
+  }
+
+  .ui-hint {
+    bottom: 16px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    gap: 8px;
+  }
+
+  .ui-glow-toggle {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .modal-card {
+    padding: 36px 28px 28px;
+  }
+
+  .modal-emoji {
+    font-size: 44px;
+  }
+
+  .modal-title-zh {
+    font-size: 20px;
+    letter-spacing: 4px;
+  }
+
+  .modal-desc {
+    font-size: 13px;
+  }
+
+  .poem-text {
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ui-logo {
+    top: 12px;
+    left: 12px;
+  }
+
+  .logo-prefix {
+    font-size: 12px;
+  }
+
+  .ui-stage {
+    top: 12px;
+    right: 12px;
+  }
+
+  .stage-progress {
+    font-size: 18px;
+  }
+
+  .ui-hint {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0 20px;
+  }
+}
+
+/* ============================================================
+   场景模式切换器
+   ============================================================ */
+.scene-switcher {
+  position: fixed;
+  bottom: 80px;
+  left: 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scene-switcher__label {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding-left: 4px;
+}
+
+.scene-switcher__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scene-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  text-align: left;
+}
+
+.scene-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.scene-btn--active {
+  background: rgba(255,107,157,0.12);
+  border-color: rgba(255,107,157,0.25);
+  color: #ff6b9d;
+  box-shadow: 0 0 20px rgba(255,107,157,0.08);
+}
+
+.scene-btn__icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.scene-btn__name {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .scene-switcher {
+    bottom: 70px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .scene-switcher__list {
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    padding-bottom: 4px;
+  }
+
+  .scene-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+  }
+
+  .scene-btn__name {
+    font-size: 11px;
+  }
+}
