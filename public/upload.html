@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>永恒花海 · 照片上传</title>
+  <style>
+    /* ============================================================
+       CSS 变量 — 与项目全局样式保持一致
+       ============================================================ */
+    :root {
+      --color-bg: #0a0a12;
+      --color-bg-secondary: #12121e;
+      --color-text: #f0e6f6;
+      --color-text-muted: rgba(240, 230, 246, 0.5);
+      --color-accent: #ff6b9d;
+      --color-accent-secondary: #c084fc;
+      --color-gold: #ffd700;
+      --color-glass: rgba(255, 255, 255, 0.04);
+      --color-glass-border: rgba(255, 255, 255, 0.08);
+      --font-display: 'Georgia', 'Noto Serif SC', 'SimSun', serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --shadow-glow: 0 0 40px rgba(255, 107, 157, 0.15);
+      --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ============================================================
+       Reset & Base
+       ============================================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       Animated Background
+       ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(255, 107, 157, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(192, 132, 252, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(102, 126, 234, 0.04) 0%, transparent 50%);
+      animation: bgDrift 20s ease-in-out infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes bgDrift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, -1%) rotate(1deg); }
+      66% { transform: translate(-1%, 2%) rotate(-1deg); }
+    }
+
+    /* ============================================================
+       Layout
+       ============================================================ */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ============================================================
+       Header
+       ============================================================ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff6b9d 0%, #c084fc 50%, #667eea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .page-header .subtitle {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       Glass Card — shared style
+       ============================================================ */
+    .glass-card {
+      background: var(--color-glass);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 32px;
+      margin-bottom: 24px;
+      transition: border-color 0.4s var(--transition-smooth),
+                  box-shadow 0.4s var(--transition-smooth);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 107, 157, 0.15);
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* ============================================================
+       Section Label
+       ============================================================ */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      opacity: 0.6;
+    }
+
+    /* ============================================================
+       Upload Zone — Drag & Drop
+       ============================================================ */
+    .upload-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 60px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s var(--transition-smooth);
+      background: rgba(255, 255, 255, 0.02);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255, 107, 157, 0.05) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--color-accent);
+      background: rgba(255, 107, 157, 0.05);
+    }
+
+    .upload-zone:hover::before,
+    .upload-zone.dragover::before {
+      opacity: 1;
+    }
+
+    .upload-zone.dragover {
+      transform: scale(1.01);
+      box-shadow: 0 0 30px rgba(255, 107, 157, 0.12);
+    }
+
+    .upload-zone-icon {
+      margin-bottom: 16px;
+    }
+
+    .upload-zone-icon svg {
+      width: 56px;
+      height: 56px;
+      stroke: var(--color-accent);
+      opacity: 0.7;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .upload-zone:hover .upload-zone-icon svg,
+    .upload-zone.dragover .upload-zone-icon svg {
+      opacity: 1;
+      transform: translateY(-4px);
+    }
+
+    .upload-zone-text {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+
+    .upload-zone-hint {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    /* ============================================================
+       Upload Form
+       ============================================================ */
+    .upload-form {
+      display: none;
+    }
+
+    .upload-form.visible {
+      display: block;
+      animation: fadeSlideUp 0.5s var(--transition-smooth);
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Preview */
+    .preview-container {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .preview-image {
+      max-width: 300px;
+      width: 100%;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .preview-image:hover {
+      transform: scale(1.02);
+    }
+
+    .compression-stats {
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+    }
+
+    .compression-stats .arrow {
+      color: var(--color-accent);
+      margin: 0 6px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(240, 230, 246, 0.3);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--color-accent);
+      background: rgba(255, 107, 157, 0.05);
+      box-shadow: 0 0 20px rgba(255, 107, 157, 0.1);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .form-group select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ff6b9d' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .form-group select option {
+      background: var(--color-bg-secondary);
+      color: var(--color-text);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ============================================================
+       Submit Button
+       ============================================================ */
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 14px 32px;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #ff6b9d 0%, #c084fc 100%);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      border: none;
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: all 0.4s var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #c084fc 0%, #667eea 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .btn-submit:hover::before {
+      opacity: 1;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255, 107, 157, 0.35);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-submit span {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       Success State
+       ============================================================ */
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 48px 32px;
+      animation: fadeSlideUp 0.5s var(--transition-smooth);
+    }
+
+    .success-message.visible {
+      display: block;
+    }
+
+    .success-emoji {
+      font-size: 56px;
+      margin-bottom: 16px;
+      animation: successBounce 0.6s var(--transition-smooth);
+    }
+
+    @keyframes successBounce {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, #ff6b9d 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .success-desc {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .btn-gallery {
+      display: inline-block;
+      padding: 12px 32px;
+      background: transparent;
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-xl);
+      color: var(--color-accent);
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-gallery:hover {
+      background: var(--color-accent);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+    }
+
+    .btn-another {
+      display: inline-block;
+      margin-left: 12px;
+      padding: 12px 32px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-xl);
+      color: var(--color-text-muted);
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-another:hover {
+      border-color: var(--color-accent);
+      color: var(--color-text);
+    }
+
+    /* ============================================================
+       Existing Photos Gallery
+       ============================================================ */
+    .gallery-section {
+      margin-top: 48px;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .photo-grid-item {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--color-glass);
+      border: 1px solid var(--color-glass-border);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .photo-grid-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(255, 107, 157, 0.15);
+    }
+
+    .photo-grid-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .photo-grid-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .photo-grid-item .photo-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 10px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .photo-grid-item:hover .photo-overlay {
+      opacity: 1;
+    }
+
+    .photo-overlay .photo-name {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100px;
+    }
+
+    .photo-overlay .btn-delete {
+      background: rgba(255, 80, 80, 0.8);
+      border: none;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .photo-overlay .btn-delete:hover {
+      background: rgba(255, 50, 50, 1);
+    }
+
+    .gallery-empty {
+      text-align: center;
+      padding: 48px 32px;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    /* ============================================================
+       Loading Spinner
+       ============================================================ */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       Footer
+       ============================================================ */
+    .page-footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--color-glass-border);
+    }
+
+    .page-footer a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: color 0.3s ease;
+    }
+
+    .page-footer a:hover {
+      color: var(--color-accent);
+    }
+
+    /* ============================================================
+       Toast Notification
+       ============================================================ */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 12px 28px;
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-xl);
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 9999;
+      transition: transform 0.4s var(--transition-smooth), opacity 0.4s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      border-color: rgba(255, 80, 80, 0.3);
+      color: #ff8080;
+    }
+
+    .toast.success {
+      border-color: rgba(255, 107, 157, 0.3);
+      color: var(--color-accent);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-wrapper">
+    <!-- ============================================================
+         Header
+         ============================================================ -->
+    <header class="page-header">
+      <h1>&#x1F338; 永恒花海 &middot; 照片上传</h1>
+      <div class="subtitle">ETERNAL BLOSSOMS &mdash; PHOTO UPLOAD</div>
+    </header>
+
+    <!-- ============================================================
+         Upload Zone
+         ============================================================ -->
+    <div class="glass-card" id="dropzone-card">
+      <div class="section-label">UPLOAD PHOTO</div>
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-zone-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <div class="upload-zone-text">拖拽照片到这里</div>
+        <div class="upload-zone-hint">或点击选择文件</div>
+        <input type="file" id="fileInput" accept="image/*" multiple>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Upload Form (hidden until a photo is selected)
+         ============================================================ -->
+    <div class="glass-card upload-form" id="uploadForm">
+      <div class="section-label">PHOTO DETAILS</div>
+
+      <!-- Preview -->
+      <div class="preview-container">
+        <img class="preview-image" id="previewImage" src="" alt="预览">
+        <div class="compression-stats" id="compressionStats"></div>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>标题 / TITLE</label>
+          <input type="text" id="inputTitle" placeholder="这张照片的名字">
+        </div>
+        <div class="form-group">
+          <label>英文标题 / ENGLISH TITLE</label>
+          <input type="text" id="inputTitleEn" placeholder="English title">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>描述 / DESCRIPTION</label>
+        <textarea id="inputDesc" placeholder="记录下这张照片背后的故事..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>分类 / CATEGORY</label>
+          <select id="inputCategory">
+            <option value="日常">日常 / Daily</option>
+            <option value="浪漫">浪漫 / Romance</option>
+            <option value="旅行">旅行 / Travel</option>
+            <option value="季节">季节 / Seasons</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>标签 / TAGS (逗号分隔)</label>
+          <input type="text" id="inputTags" placeholder="风景, 城市, 夕阳">
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btnSubmit" disabled>
+        <span>上 传</span>
+      </button>
+    </div>
+
+    <!-- ============================================================
+         Success State (hidden)
+         ============================================================ -->
+    <div class="glass-card success-message" id="successMessage">
+      <div class="success-emoji">&#x1F338;</div>
+      <div class="success-title">上传成功！</div>
+      <div class="success-desc">照片已保存至永恒花海</div>
+      <div>
+        <a class="btn-gallery" href="index.html">查看画廊</a>
+        <button class="btn-another" id="btnAnother">继续上传</button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Existing Photos Gallery
+         ============================================================ -->
+    <div class="gallery-section" id="gallerySection">
+      <div class="glass-card">
+        <div class="section-label">EXISTING PHOTOS</div>
+        <div id="galleryContent">
+          <div class="gallery-empty">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Footer
+         ============================================================ -->
+    <footer class="page-footer">
+      <a href="index.html">&larr; 返回永恒花海 / BACK TO GALLERY</a>
+    </footer>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============================================================
+       JavaScript
+       ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    // ============================================================
+    // DOM Elements
+    // ============================================================
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const dropzoneCard = document.getElementById('dropzone-card');
+    const uploadForm = document.getElementById('uploadForm');
+    const previewImage = document.getElementById('previewImage');
+    const compressionStats = document.getElementById('compressionStats');
+    const inputTitle = document.getElementById('inputTitle');
+    const inputTitleEn = document.getElementById('inputTitleEn');
+    const inputDesc = document.getElementById('inputDesc');
+    const inputCategory = document.getElementById('inputCategory');
+    const inputTags = document.getElementById('inputTags');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const successMessage = document.getElementById('successMessage');
+    const btnAnother = document.getElementById('btnAnother');
+    const galleryContent = document.getElementById('galleryContent');
+    const toast = document.getElementById('toast');
+
+    // State
+    let selectedFile = null;
+    let compressedDataUrl = null;
+    let originalSize = 0;
+    let compressedSize = 0;
+
+    // ============================================================
+    // Toast
+    // ============================================================
+    function showToast(msg, type) {
+      toast.textContent = msg;
+      toast.className = 'toast ' + (type || '');
+      // Force reflow
+      void toast.offsetWidth;
+      toast.classList.add('show');
+      setTimeout(function () {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // ============================================================
+    // Drag & Drop
+    // ============================================================
+    uploadZone.addEventListener('click', function () {
+      fileInput.click();
+    });
+
+    uploadZone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadZone.classList.remove('dragover');
+
+      var files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', function () {
+      if (fileInput.files && fileInput.files.length > 0) {
+        handleFile(fileInput.files[0]);
+      }
+    });
+
+    // ============================================================
+    // File Handling & Compression
+    // ============================================================
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('请选择图片文件', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      originalSize = file.size;
+
+      // Show preview immediately with original
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+
+        // Auto-fill title from filename
+        var name = file.name.replace(/\.[^.]+$/, '');
+        inputTitle.value = name;
+        inputTitleEn.value = toEnglishTitle(name);
+
+        // Compress
+        compressImage(file);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * Client-side image compression
+     * Resize to max 800px width, JPEG quality 0.85
+     */
+    function compressImage(file) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+
+      img.onload = function () {
+        var width = img.width;
+        var height = img.height;
+        var maxWidth = 800;
+
+        if (width > maxWidth) {
+          height = Math.round((height / width) * maxWidth);
+          width = maxWidth;
+        }
+
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        compressedSize = Math.round((compressedDataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4);
+
+        URL.revokeObjectURL(url);
+
+        // Show compression stats
+        var origStr = formatSize(originalSize);
+        var compStr = formatSize(compressedSize);
+        var ratio = originalSize > 0 ? Math.round((1 - compressedSize / originalSize) * 100) : 0;
+
+        compressionStats.innerHTML =
+          origStr + ' <span class="arrow">&rarr;</span> ' + compStr +
+          ' <span class="arrow">&middot;</span> ' + (ratio > 0 ? '-' + ratio + '%' : '优化');
+
+        // Enable submit
+        btnSubmit.disabled = false;
+      };
+
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        showToast('图片加载失败，请重试', 'error');
+      };
+
+      img.src = url;
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    /**
+     * Simple heuristic to convert Chinese filename to an English-like title
+     */
+    function toEnglishTitle(name) {
+      // If it already looks like ASCII, just upper-case it
+      if (/^[\x20-\x7E]+$/.test(name)) {
+        return name.toUpperCase().replace(/[_-]+/g, ' ');
+      }
+      // Otherwise return empty — user can fill it in
+      return '';
+    }
+
+    // ============================================================
+    // Form Submission
+    // ============================================================
+    btnSubmit.addEventListener('click', function () {
+      if (!compressedDataUrl || btnSubmit.disabled) return;
+
+      var title = inputTitle.value.trim();
+      if (!title) {
+        showToast('请输入标题', 'error');
+        inputTitle.focus();
+        return;
+      }
+
+      var category = inputCategory.value;
+      var tags = inputTags.value.trim();
+
+      // Disable button, show loading
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span class="spinner"></span><span>上传中...</span>';
+
+      var payload = {
+        title: title,
+        titleEn: inputTitleEn.value.trim(),
+        desc: inputDesc.value.trim(),
+        category: category,
+        tags: tags,
+        image: compressedDataUrl,
+      };
+
+      fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          if (result.success) {
+            // Show success
+            uploadForm.classList.remove('visible');
+            dropzoneCard.style.display = 'none';
+            successMessage.classList.add('visible');
+            showToast('上传成功！', 'success');
+            loadGallery();
+          } else {
+            showToast(result.message || '上传失败', 'error');
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<span>上 传</span>';
+          }
+        })
+        .catch(function (err) {
+          console.error('Upload error:', err);
+          showToast('网络错误，请重试', 'error');
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = '<span>上 传</span>';
+        });
+    });
+
+    // ============================================================
+    // Success State — "Upload Another"
+    // ============================================================
+    btnAnother.addEventListener('click', function () {
+      successMessage.classList.remove('visible');
+      dropzoneCard.style.display = '';
+      uploadForm.classList.remove('visible');
+      resetForm();
+    });
+
+    function resetForm() {
+      selectedFile = null;
+      compressedDataUrl = null;
+      originalSize = 0;
+      compressedSize = 0;
+      previewImage.src = '';
+      compressionStats.innerHTML = '';
+      inputTitle.value = '';
+      inputTitleEn.value = '';
+      inputDesc.value = '';
+      inputCategory.value = '日常';
+      inputTags.value = '';
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span>上 传</span>';
+      fileInput.value = '';
+    }
+
+    // ============================================================
+    // Gallery — Load Existing Photos
+    // ============================================================
+    function loadGallery() {
+      fetch('/api/photos')
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          if (result.success && result.data && result.data.length > 0) {
+            renderGallery(result.data);
+          } else {
+            galleryContent.innerHTML = '<div class="gallery-empty">暂无已上传的照片</div>';
+          }
+        })
+        .catch(function () {
+          galleryContent.innerHTML = '<div class="gallery-empty">加载照片列表失败</div>';
+        });
+    }
+
+    function renderGallery(photos) {
+      var html = '<div class="photo-grid">';
+      photos.forEach(function (photo) {
+        html +=
+          '<div class="photo-grid-item" data-filename="' + escapeAttr(photo.filename) + '">' +
+            '<img src="' + escapeAttr(photo.url) + '" alt="' + escapeAttr(photo.filename) + '" loading="lazy">' +
+            '<div class="photo-overlay">' +
+              '<span class="photo-name">' + escapeHtml(photo.filename) + '</span>' +
+              '<button class="btn-delete" title="删除">&times;</button>' +
+            '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+      galleryContent.innerHTML = html;
+
+      // Attach delete handlers
+      var deleteButtons = galleryContent.querySelectorAll('.btn-delete');
+      deleteButtons.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var item = btn.closest('.photo-grid-item');
+          var filename = item.getAttribute('data-filename');
+          deletePhoto(filename, item);
+        });
+      });
+    }
+
+    function deletePhoto(filename, element) {
+      if (!confirm('确定要删除这张照片吗？\n' + filename)) return;
+
+      fetch('/api/photos/' + encodeURIComponent(filename), {
+        method: 'DELETE',
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          if (result.success) {
+            element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            element.style.opacity = '0';
+            element.style.transform = 'scale(0.8)';
+            setTimeout(function () {
+              element.remove();
+              // Check if grid is now empty
+              var remaining = galleryContent.querySelectorAll('.photo-grid-item');
+              if (remaining.length === 0) {
+                galleryContent.innerHTML = '<div class="gallery-empty">暂无已上传的照片</div>';
+              }
+            }, 300);
+            showToast('照片已删除', 'success');
+          } else {
+            showToast(result.message || '删除失败', 'error');
+          }
+        })
+        .catch(function () {
+          showToast('网络错误', 'error');
+        });
+    }
+
+    // ============================================================
+    // Helpers
+    // ============================================================
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ============================================================
+    // Init — Load gallery on page load
+    // ============================================================
+    loadGallery();
+
+  })();
+  </script>
+
+</body>
+</html>

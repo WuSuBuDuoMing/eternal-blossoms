@@ -7,6 +7,7 @@ const express = require('express');
 const path = require('path');
 const apiRoutes = require('./routes/api');
 const cardsExtra = require('./routes/cards-extra');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -39,13 +40,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '10mb' })); // 10mb for photo uploads
 
 // CORS 支持（可通过 CORS_ORIGIN 环境变量控制）
 app.use((req, res, next) => {
   const origin = process.env.CORS_ORIGIN || '*';
   res.header('Access-Control-Allow-Origin', origin);
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 // API 路由
 app.use('/api', apiRoutes);
 app.use('/api', cardsExtra);
+app.use('/api', uploadRoutes);
 
 // 静态文件服务 — public 目录
 app.use(express.static(path.join(__dirname, 'public')));

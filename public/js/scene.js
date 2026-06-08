@@ -406,6 +406,151 @@ class SceneManager {
   }
 
   /**
+   * 为带有照片的卡片创建 CanvasTexture
+   * 异步加载图片并绘制为卡片背景，底部带有渐变暗层保证文字可读性
+   * 如果图片加载失败，回退到 createCardTexture 渐变纹理
+   */
+  createPhotoTexture(cardData) {
+    return new Promise((resolve) => {
+      const width = 512;
+      const height = 640;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      // 圆角矩形辅助
+      const cornerR = 28;
+      const roundRect = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+      };
+
+      // 裁剪为圆角
+      roundRect(0, 0, width, height, cornerR);
+      ctx.clip();
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+
+      img.onload = () => {
+        // 绘制图片（cover 模式，填满画布）
+        const scale = Math.max(width / img.width, height / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        const x = (width - w) / 2;
+        const y = (height - h) / 2;
+        ctx.drawImage(img, x, y, w, h);
+
+        // 底部渐变暗层，保证文字可读
+        const overlay = ctx.createLinearGradient(0, height * 0.45, 0, height);
+        overlay.addColorStop(0, 'rgba(0,0,0,0)');
+        overlay.addColorStop(0.5, 'rgba(0,0,0,0.3)');
+        overlay.addColorStop(1, 'rgba(0,0,0,0.7)');
+        ctx.fillStyle = overlay;
+        ctx.fillRect(0, 0, width, height);
+
+        // 边框
+        roundRect(2, 2, width - 4, height - 4, 26);
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Emoji — 较小，顶部区域
+        ctx.save();
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+        ctx.shadowBlur = 15;
+        ctx.font = '60px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cardData.emoji, width / 2, 80);
+        ctx.restore();
+
+        // 中文标题 — 底部区域，带阴影
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 12;
+        ctx.font = 'bold 36px "Georgia", "SimSun", serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cardData.title, width / 2, height * 0.75);
+        ctx.restore();
+
+        // 英文标题
+        ctx.font = '600 13px "SF Mono", "Consolas", monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cardData.titleEn || '', width / 2, height * 0.805);
+
+        // 描述文字（自动换行，最多2行，超出加省略号）
+        if (cardData.desc) {
+          ctx.font = '18px "Georgia", "SimSun", serif';
+          ctx.fillStyle = 'rgba(255,255,255,0.75)';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const maxWidth = width * 0.82;
+          const lineHeight = 24;
+          const maxLines = 2;
+          const lines = [];
+
+          let remaining = cardData.desc;
+          for (let line = 0; line < maxLines && remaining.length > 0; line++) {
+            if (line === maxLines - 1) {
+              let testLine = remaining;
+              while (ctx.measureText(testLine + '...').width > maxWidth && testLine.length > 0) {
+                testLine = testLine.slice(0, -1);
+              }
+              lines.push(testLine.length < remaining.length ? testLine + '...' : testLine);
+              break;
+            }
+            let cutPos = remaining.length;
+            while (cutPos > 0 && ctx.measureText(remaining.slice(0, cutPos)).width > maxWidth) {
+              cutPos--;
+            }
+            lines.push(remaining.slice(0, cutPos));
+            remaining = remaining.slice(cutPos);
+          }
+
+          const totalTextHeight = lines.length * lineHeight;
+          const startY = height * 0.87 - totalTextHeight / 2 + lineHeight / 2;
+          lines.forEach((line, i) => {
+            ctx.fillText(line, width / 2, startY + i * lineHeight);
+          });
+        }
+
+        // 底部品牌文字
+        ctx.font = '9px "SF Mono", "Consolas", monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.textAlign = 'center';
+        ctx.fillText('ETERNAL BLOSSOMS', width / 2, height * 0.95);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+        resolve(texture);
+      };
+
+      img.onerror = () => {
+        // 图片加载失败，回退到渐变纹理
+        resolve(this.createCardTexture(cardData, 'high'));
+      };
+
+      img.src = cardData.image;
+    });
+  }
+
+  /**
    * 颜色加深辅助
    */
   _darkenColor(hex, factor) {
@@ -429,8 +574,9 @@ class SceneManager {
 
   /**
    * 创建所有卡片 Mesh
+   * 支持渐变卡片和照片卡片（cardData.image 存在时使用照片纹理）
    */
-  createCards(cardsData) {
+  async createCards(cardsData) {
     // 清理旧卡片的 GPU 资源（防止纹理泄漏）
     this.cards.forEach(c => {
       c.material.map?.dispose();
@@ -444,30 +590,31 @@ class SceneManager {
     const cardHeight = 3.5;
     const geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
 
-    cardsData.forEach((card, i) => {
-      const texture = this.createCardTexture(card, 'high');
+    // 收集所有照片纹理的加载 Promise
+    const photoPromises = [];
 
+    cardsData.forEach((card, i) => {
       const material = new THREE.MeshStandardMaterial({
-        map: texture,
         transparent: true,
         opacity: 0,
         side: THREE.DoubleSide,
         roughness: 0.35,
         metalness: 0.05,
-        emissive: new THREE.Color(card.color),
+        emissive: new THREE.Color(card.color || '#667eea'),
         emissiveIntensity: 0.12,
       });
 
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.frustumCulled = true; // R15: enable frustum culling
+      mesh.frustumCulled = true;
       mesh.userData = {
         cardData: card,
         index: i,
-        targetOpacity: 1,        // R18: fade-in target
-        fadeDelay: i * 0.05,     // R18: stagger delay (seconds)
-        quality: 'high',         // R16: current texture quality
-        originalScale: 1,        // R17: store original scale
-        originalEmissiveIntensity: 0.12, // R17: store original emissive
+        targetOpacity: 1,
+        fadeDelay: i * 0.05,
+        quality: card.image ? 'photo' : 'high',  // 照片卡片标记为 'photo' 避免 LOD 替换
+        originalScale: 1,
+        originalEmissiveIntensity: 0.12,
+        isPhotoCard: !!card.image,
       };
 
       // 初始位置：远处
@@ -480,7 +627,29 @@ class SceneManager {
 
       this.scene.add(mesh);
       this.cards.push(mesh);
+
+      // 加载纹理
+      if (card.image) {
+        // 照片卡片：异步加载，加载完成后应用纹理
+        const promise = this.createPhotoTexture(card).then(texture => {
+          material.map = texture;
+          material.needsUpdate = true;
+        });
+        photoPromises.push(promise);
+      } else {
+        // 渐变卡片：同步创建纹理
+        material.map = this.createCardTexture(card, 'high');
+        material.needsUpdate = true;
+      }
     });
+
+    // 等待所有照片纹理加载完成（超时 5 秒兜底，避免阻塞）
+    if (photoPromises.length > 0) {
+      await Promise.race([
+        Promise.all(photoPromises),
+        new Promise(resolve => setTimeout(resolve, 5000)),
+      ]);
+    }
   }
 
   /**
@@ -500,14 +669,16 @@ class SceneManager {
         mesh.userData.targetOpacity = 1;
       }
 
-      // R16: LOD — switch to low quality texture for far-away cards
-      const distFromCamera = this.camera.position.distanceTo(mesh.position);
-      const newQuality = distFromCamera > 25 ? 'low' : 'high';
-      if (mesh.userData.quality !== newQuality) {
-        mesh.material.map?.dispose();
-        mesh.material.map = this.createCardTexture(mesh.userData.cardData, newQuality);
-        mesh.material.needsUpdate = true;
-        mesh.userData.quality = newQuality;
+      // R16: LOD — switch to low quality texture for far-away cards (skip photo cards)
+      if (!mesh.userData.isPhotoCard) {
+        const distFromCamera = this.camera.position.distanceTo(mesh.position);
+        const newQuality = distFromCamera > 25 ? 'low' : 'high';
+        if (mesh.userData.quality !== newQuality) {
+          mesh.material.map?.dispose();
+          mesh.material.map = this.createCardTexture(mesh.userData.cardData, newQuality);
+          mesh.material.needsUpdate = true;
+          mesh.userData.quality = newQuality;
+        }
       }
 
       // 平滑插值到目标位置
