@@ -12,6 +12,34 @@
   'use strict';
 
   // ================================================================
+  // EventEmitter（轻量事件总线）
+  // ================================================================
+  const events = {
+    _handlers: {},
+    on(e, fn) {
+      (this._handlers[e] ||= []).push(fn);
+    },
+    emit(e, ...a) {
+      (this._handlers[e] || []).forEach(fn => fn(...a));
+    },
+  };
+
+  // ================================================================
+  // 集中式状态管理（单一数据源）
+  // ================================================================
+  const state = {
+    _data: { progress: 0, mode: 'bloom', isModalOpen: false, cardCount: 0 },
+    get progress()    { return this._data.progress; },
+    set progress(v)   { this._data.progress = v;    events.emit('stateChange', 'progress', v); },
+    get mode()        { return this._data.mode; },
+    set mode(v)       { this._data.mode = v;        events.emit('stateChange', 'mode', v); },
+    get isModalOpen() { return this._data.isModalOpen; },
+    set isModalOpen(v){ this._data.isModalOpen = v; events.emit('stateChange', 'isModalOpen', v); },
+    get cardCount()   { return this._data.cardCount; },
+    set cardCount(v)  { this._data.cardCount = v;   events.emit('stateChange', 'cardCount', v); },
+  };
+
+  // ================================================================
   // 创建子系统实例
   // ================================================================
   const particles = new ParticleSystem('particle-canvas');
@@ -56,35 +84,51 @@
     cardsData = _getFallbackData();
   }
 
+  // R50: 确保每张卡片都包含完整的字段（API 数据可能缺少新增字段）
+  cardsData = cardsData.map((card, idx) => ({
+    id: card.id ?? idx + 1,
+    title: card.title ?? '',
+    titleEn: card.titleEn ?? '',
+    desc: card.desc ?? '',
+    emoji: card.emoji ?? '',
+    gradient: card.gradient ?? '',
+    color: card.color ?? '#667eea',
+    category: card.category ?? '日常',
+    tags: Array.isArray(card.tags) ? card.tags : [],
+    sortWeight: card.sortWeight ?? 0,
+  }));
+
   ui.setLoadingProgress(60, `正在绘制 ${cardsData.length} 张记忆卡片 ...`);
 
   // ================================================================
   // 创建卡片
   // ================================================================
   scene.createCards(cardsData);
+  state.cardCount = cardsData.length;
 
   ui.setLoadingProgress(85, '正在点亮花海中的星光 ...');
 
   // ================================================================
   // 绑定卡片双击事件
   // ================================================================
-  scene.onCardDoubleClick = (cardData) => {
+  events.on('cardDoubleClick', (cardData) => {
     ui.openModal(cardData);
-  };
+  });
 
   // ================================================================
   // 绑定进度回调（同步到场景）
   // ================================================================
-  ui.onProgressChange = (progress) => {
+  events.on('progressChange', (progress) => {
+    state.progress = progress;
     scene.globalProgress = progress;
-  };
+  });
 
   // ================================================================
   // Constant Glow 开关
   // ================================================================
-  ui.onGlowToggle = (enabled) => {
+  events.on('glowToggle', (enabled) => {
     particles.setConstantGlow(enabled);
-  };
+  });
 
   // ================================================================
   // 模拟加载完成
@@ -99,86 +143,92 @@
   function animate() {
     requestAnimationFrame(animate);
 
-    // 更新 UI
-    ui.update();
+    try {
+      // 更新 UI
+      ui.update();
 
-    // 计算布局位置
-    const positions = Layouts.computePositions(ui.globalProgress, cardsData.length);
-    scene.updateCardPositions(positions);
+      // 计算布局位置
+      const positions = Layouts.computePositions(ui.globalProgress, cardsData.length);
+      scene.updateCardPositions(positions);
 
-    // 渲染 Three.js
-    scene.render();
+      // 渲染 Three.js
+      scene.render();
 
-    // 渲染粒子
-    particles.render();
+      // 渲染粒子
+      particles.render();
+    } catch (err) {
+      console.error('[Render Loop]', err);
+    }
   }
 
   animate();
 
   // ================================================================
-  // 场景模式切换
+  // 场景模式切换（延迟构建配置）
   // ================================================================
-  const SCENE_MODES = {
-    bloom: {
-      name: '花海漫游',
-      nameEn: 'BLOOM WALK',
-      fogColor: 0x0e0810,
-      fogDensity: 0.018,
-      cameraDistance: 18,
-      particleDensity: 1.0,
-      particleHue: 340,
-      ambientIntensity: 0.6,
-    },
-    memory: {
-      name: '记忆照片墙',
-      nameEn: 'MEMORY WALL',
-      fogColor: 0x0a0a18,
-      fogDensity: 0.015,
-      cameraDistance: 16,
-      particleDensity: 0.5,
-      particleHue: 220,
-      ambientIntensity: 0.8,
-    },
-    starlight: {
-      name: '星光告白',
-      nameEn: 'STARLIGHT',
-      fogColor: 0x050510,
-      fogDensity: 0.012,
-      cameraDistance: 22,
-      particleDensity: 1.5,
-      particleHue: 50,
-      ambientIntensity: 0.4,
-    },
-    timeline: {
-      name: '时间长廊',
-      nameEn: 'TIMELINE',
-      fogColor: 0x0c0808,
-      fogDensity: 0.020,
-      cameraDistance: 20,
-      particleDensity: 0.7,
-      particleHue: 30,
-      ambientIntensity: 0.5,
-    },
-    garden: {
-      name: '永恒花园',
-      nameEn: 'ETERNAL GARDEN',
-      fogColor: 0x080e08,
-      fogDensity: 0.016,
-      cameraDistance: 17,
-      particleDensity: 1.2,
-      particleHue: 120,
-      ambientIntensity: 0.7,
-    },
-  };
+  function getSceneModeConfig(mode) {
+    const configs = {
+      bloom: {
+        name: '花海漫游',
+        nameEn: 'BLOOM WALK',
+        fogColor: 0x0e0810,
+        fogDensity: 0.018,
+        cameraDistance: 18,
+        particleDensity: 1.0,
+        particleHue: 340,
+        ambientIntensity: 0.6,
+      },
+      memory: {
+        name: '记忆照片墙',
+        nameEn: 'MEMORY WALL',
+        fogColor: 0x0a0a18,
+        fogDensity: 0.015,
+        cameraDistance: 16,
+        particleDensity: 0.5,
+        particleHue: 220,
+        ambientIntensity: 0.8,
+      },
+      starlight: {
+        name: '星光告白',
+        nameEn: 'STARLIGHT',
+        fogColor: 0x050510,
+        fogDensity: 0.012,
+        cameraDistance: 22,
+        particleDensity: 1.5,
+        particleHue: 50,
+        ambientIntensity: 0.4,
+      },
+      timeline: {
+        name: '时间长廊',
+        nameEn: 'TIMELINE',
+        fogColor: 0x0c0808,
+        fogDensity: 0.020,
+        cameraDistance: 20,
+        particleDensity: 0.7,
+        particleHue: 30,
+        ambientIntensity: 0.5,
+      },
+      garden: {
+        name: '永恒花园',
+        nameEn: 'ETERNAL GARDEN',
+        fogColor: 0x080e08,
+        fogDensity: 0.016,
+        cameraDistance: 17,
+        particleDensity: 1.2,
+        particleHue: 120,
+        ambientIntensity: 0.7,
+      },
+    };
+    return configs[mode] || null;
+  }
 
-  let currentMode = 'bloom';
   const _reusableColor = new THREE.Color(); // 复用对象，避免 GC 压力
 
   function applySceneMode(mode) {
-    const config = SCENE_MODES[mode];
+    const config = getSceneModeConfig(mode);
     if (!config || !scene || !scene.scene) return;
 
-    currentMode = mode;
+    state.mode = mode;
 
     // 渐变切换雾效
     if (scene.scene.fog) {
@@ -211,7 +261,7 @@
   sceneBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const mode = btn.dataset.mode;
-      if (mode === currentMode) return;
+      if (mode === state.mode) return;
 
       // 更新按钮状态
       sceneBtns.forEach(b => b.classList.remove('scene-btn--active'));
@@ -253,6 +303,28 @@
       '图书馆里你安静阅读的侧影，比任何文字都要动人。',
       '你系上围裙在厨房忙碌的背影，是家最温暖的模样。',
     ];
+    // R47: category 分布 — 3 日常, 3 浪漫, 3 旅行, 3 季节
+    const categories = [
+      '日常','日常','旅行','浪漫','旅行','日常',
+      '季节','季节','浪漫','浪漫','旅行','季节',
+    ];
+    // R48: 每张卡片 2-3 个标签
+    const tags = [
+      ['微笑','温暖','日常'],
+      ['阳光','午后','慵懒'],
+      ['雨天','漫步','浪漫'],
+      ['星空','许愿','浪漫'],
+      ['海边','日落','旅行'],
+      ['咖啡','下午茶','日常'],
+      ['秋天','落叶','季节'],
+      ['冬天','初雪','季节'],
+      ['花园','花语','浪漫'],
+      ['月光','舞蹈','浪漫'],
+      ['图书馆','阅读','旅行'],
+      ['厨房','烘焙','日常'],
+    ];
+    // R49: sortWeight 降序 12 → 1
+    const sortWeights = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
     return emojis.map((e, i) => ({
       id: i + 1,
@@ -262,6 +334,9 @@
       emoji: e,
       gradient: `linear-gradient(135deg, ${colors[i]} 0%, ${colors[(i+1)%12]} 100%)`,
       color: colors[i],
+      category: categories[i],
+      tags: tags[i],
+      sortWeight: sortWeights[i],
     }));
   }
 })();

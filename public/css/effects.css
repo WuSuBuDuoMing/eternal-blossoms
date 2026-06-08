@@ -1,0 +1,368 @@
+/* ============================================================
+   effects.css — Rounds 61-65: Visual Effects & Micro-interactions
+   Eternal Blossoms — Pink/Gold Theme
+   ============================================================ */
+
+/* ==========================================================
+   R61 — Particle CSS Background (Loading Screen)
+   20 floating circles via box-shadow on a single pseudo-element
+   ========================================================== */
+
+.particle-bg {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a0a12 0%, #2d1225 50%, #1a0a12 100%);
+}
+
+.particle-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: floatParticle 14s linear infinite;
+  z-index: 0;
+
+  /*
+     20 particles — box-shadow spread + color.
+     Layout: spread across viewport (x in px, y in vh-like offsets scaled to px).
+     Each pair is (x-offset y-offset blur spread color).
+  */
+  box-shadow:
+    /* Row 1 — pink particles */
+    40px  80px  0 0  rgba(255, 182, 193, 0.7),
+    120px 160px 0 0  rgba(255, 182, 193, 0.5),
+    260px  40px 0 0  rgba(255, 182, 193, 0.6),
+    380px 200px 0 0  rgba(255, 182, 193, 0.4),
+    520px  90px 0 0  rgba(255, 182, 193, 0.55),
+    680px 140px 0 0  rgba(255, 182, 193, 0.65),
+    820px  60px 0 0  rgba(255, 182, 193, 0.5),
+    960px 180px 0 0  rgba(255, 182, 193, 0.45),
+    1100px 100px 0 0 rgba(255, 182, 193, 0.6),
+    1250px 220px 0 0 rgba(255, 182, 193, 0.5),
+    /* Row 2 — gold particles */
+    80px  320px 0 0  rgba(255, 215, 100, 0.6),
+    220px 400px 0 0  rgba(255, 215, 100, 0.5),
+    340px 280px 0 0  rgba(255, 215, 100, 0.55),
+    500px 360px 0 0  rgba(255, 215, 100, 0.45),
+    640px 300px 0 0  rgba(255, 215, 100, 0.6),
+    780px 420px 0 0  rgba(255, 215, 100, 0.5),
+    920px 340px 0 0  rgba(255, 215, 100, 0.55),
+    1060px 260px 0 0 rgba(255, 215, 100, 0.4),
+    1200px 380px 0 0 rgba(255, 215, 100, 0.5),
+    1350px 300px 0 0 rgba(255, 215, 100, 0.6);
+}
+
+@keyframes floatParticle {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-180px) translateX(30px) scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-360px) translateX(-20px) scale(0.9);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-540px) translateX(15px) scale(1.05);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-720px) translateX(-10px) scale(1);
+    opacity: 0;
+  }
+}
+
+
+/* ==========================================================
+   R62 — Glassmorphism Utilities
+   ========================================================== */
+
+/* --- Base Glass --- */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* --- Light Variant --- */
+.glass-light {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  color: #fff;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* --- Dark Variant --- */
+.glass-dark {
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: #f0e6ef;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* --- Card-specific Glass with Hover State --- */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 182, 193, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 182, 193, 0.3);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 182, 193, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+
+/* ==========================================================
+   R63 — Gradient Animations
+   ========================================================== */
+
+/* --- Animated Gradient Background --- */
+.gradient-animate {
+  background: linear-gradient(
+    135deg,
+    #ff6b9d, #c44dff, #ff6b9d,
+    #ffd700, #ff6b9d
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  25%  { background-position: 100% 0%; }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* --- Animated Gradient Text --- */
+.gradient-text {
+  background: linear-gradient(
+    270deg,
+    #ffb6c1, #ffd700, #c44dff, #ffb6c1
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* --- Animated Gradient Border --- */
+.gradient-border {
+  position: relative;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Pseudo-element behind content — acts as the animated border */
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    270deg,
+    #ffb6c1, #ffd700, #c44dff, #ffb6c1
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* Inner padding so content sits above the pseudo-border */
+.gradient-border::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgba(26, 10, 18, 0.92);
+}
+
+
+/* ==========================================================
+   R64 — Transition Utilities
+   ========================================================== */
+
+/* --- Fade --- */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* --- Slide --- */
+.slide-up {
+  animation: slideUp 0.5s ease forwards;
+}
+
+.slide-down {
+  animation: slideDown 0.5s ease forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Scale --- */
+.scale-in {
+  animation: scaleIn 0.5s ease forwards;
+}
+
+.scale-out {
+  animation: scaleOut 0.5s ease forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scaleOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.9); }
+}
+
+/* --- Stagger Delays (100ms increments) --- */
+.stagger-1 { animation-delay: 100ms; }
+.stagger-2 { animation-delay: 200ms; }
+.stagger-3 { animation-delay: 300ms; }
+.stagger-4 { animation-delay: 400ms; }
+.stagger-5 { animation-delay: 500ms; }
+
+/* Stagger children start hidden so delay is visible */
+[class*="stagger-"] {
+  animation-fill-mode: both;
+}
+
+
+/* ==========================================================
+   R65 — Micro-interactions (Hover / Focus)
+   ========================================================== */
+
+/* --- Hover Lift --- */
+.hover-lift {
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 182, 193, 0.15);
+}
+
+/* --- Hover Glow --- */
+.hover-glow {
+  transition:
+    box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-glow:hover {
+  box-shadow:
+    0 0 15px rgba(255, 182, 193, 0.35),
+    0 0 30px rgba(255, 182, 193, 0.15);
+}
+
+/* --- Hover Scale --- */
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* --- Click Shrink --- */
+.click-shrink {
+  transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.click-shrink:active {
+  transform: scale(0.98);
+}
+
+/* --- Combined convenience class: lift + shrink + glow --- */
+.interactive {
+  cursor: pointer;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.interactive:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 6px 20px rgba(255, 182, 193, 0.2),
+    0 0 15px rgba(255, 182, 193, 0.1);
+}
+
+.interactive:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(255, 182, 193, 0.1);
+}
+
+/* --- Focus-visible ring for accessibility --- */
+.hover-lift:focus-visible,
+.hover-glow:focus-visible,
+.hover-scale:focus-visible,
+.click-shrink:focus-visible,
+.interactive:focus-visible {
+  outline: 2px solid rgba(255, 182, 193, 0.6);
+  outline-offset: 3px;
+}

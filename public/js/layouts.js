@@ -1,10 +1,11 @@
 /**
- * 六种 3D 布局模式算法
+ * 七种 3D 布局模式算法
  *
  * ARRIVAL  — 晨曦初临  (0%)
  * FAN      — 卷帘展开  (20%)
  * GATHER   — 同心汇聚  (35%)
- * GRID     — 网格呼吸  (50%)
+ * WAVE     — 正弦波动  (45%)
+ * GRID     — 网格呼吸  (55%)
  * SPIRAL   — 螺旋花涡  (70%)
  * DEPART   — 永恒归宿  (92%)
  *
@@ -17,6 +18,17 @@ class Layouts {
   // ================================================================
   // 工具方法
   // ================================================================
+
+  // ================================================================
+  // 缓动函数集合
+  // ================================================================
+  static easingFunctions = {
+    easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+    easeOutBack: t => {
+      const c = 1.70158;
+      return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
+    },
+  };
 
   /**
    * smoothstep 缓动
@@ -206,21 +218,58 @@ class Layouts {
   }
 
   // ================================================================
+  // 布局 5b: WAVE — 正弦波动（沿X轴的正弦波排列）
+  // ================================================================
+  static WAVE(index, total) {
+    const t = index / total;
+    const x = (t - 0.5) * 20;
+    const y = Math.sin(index * 0.8) * 3;
+    const z = -8 + Math.cos(index * 0.5) * 2;
+
+    return {
+      x: x,
+      y: y,
+      z: z,
+      rx: 0,
+      ry: 0,
+      rz: Math.cos(index * 0.8) * 0.15,
+      scale: 0.85,
+    };
+  }
+
+  // ================================================================
   // 布局 6: DEPART — 永恒归宿（心形参数曲线环绕）
   // ================================================================
   static DEPART(index, total) {
-    const t = (index / total) * Math.PI * 2;
+    // 变量密度映射：在心形顶部（cusp）分配更多点，使曲线更平滑
+    // 先用均匀 t，再通过密度重映射让 cusp 附近（t=0 和 t=PI 区域）点更密集
+    const u = index / total; // 0~1 均匀
+    // 使用 sin^2 映射让 t=0.5 (心形底部) 稀疏，t=0/1 (心形顶部 cusp) 密集
+    const densityFactor = 1 - 0.4 * Math.sin(u * Math.PI); // 0.6 ~ 1.0
+    // 重新映射：累积分布反函数的近似
+    const t = (u - 0.5 * (Math.sin(u * Math.PI * 2) / (2 * Math.PI))) * Math.PI * 2;
 
     // 心形参数方程
     const scale_param = 2.5;
-    const x = scale_param * 16 * Math.pow(Math.sin(t), 3) / 10;
+    const sinT = Math.sin(t);
+    const x = scale_param * 16 * Math.pow(sinT, 3) / 10;
     const y = scale_param * (
       13 * Math.cos(t) -
       5 * Math.cos(2 * t) -
       2 * Math.cos(3 * t) -
       Math.cos(4 * t)
     ) / 10;
-    const z = Math.sin(t * 2) * 2 - 8;
+
+    // z 深度变化基于曲线导数（dx/dt），导数大的地方 z 偏移更大
+    const dx_dt = scale_param * 16 * 3 * Math.pow(sinT, 2) * Math.cos(t) / 10;
+    const dy_dt = scale_param * (
+      -13 * Math.sin(t) +
+      10 * Math.sin(2 * t) +
+      6 * Math.sin(3 * t) +
+      4 * Math.sin(4 * t)
+    ) / 10;
+    const derivativeMag = Math.sqrt(dx_dt * dx_dt + dy_dt * dy_dt);
+    const z = -8 + Math.sin(t * 2) * 1.5 + derivativeMag * 0.15;
 
     return {
       x: x,
@@ -240,7 +289,8 @@ class Layouts {
     { name: 'ARRIVAL',  zh: '晨曦初临', pct: 0,  fn: 'ARRIVAL'  },
     { name: 'FAN',      zh: '卷帘展开', pct: 0.20, fn: 'FAN'      },
     { name: 'GATHER',   zh: '同心汇聚', pct: 0.35, fn: 'GATHER'   },
-    { name: 'GRID',     zh: '网格呼吸', pct: 0.50, fn: 'GRID'     },
+    { name: 'WAVE',     zh: '正弦波动', pct: 0.45, fn: 'WAVE'     },
+    { name: 'GRID',     zh: '网格呼吸', pct: 0.55, fn: 'GRID'     },
     { name: 'SPIRAL',   zh: '螺旋花涡', pct: 0.70, fn: 'SPIRAL'   },
     { name: 'DEPART',   zh: '永恒归宿', pct: 0.92, fn: 'DEPART'   },
   ];
@@ -281,7 +331,9 @@ class Layouts {
     if (fromIdx === toIdx) {
       blend = 1;
     } else {
-      blend = Layouts.smoothstep(fromStage.pct, toStage.pct, globalProgress);
+      blend = Layouts.easingFunctions.easeInOutCubic(
+        (globalProgress - fromStage.pct) / (toStage.pct - fromStage.pct)
+      );
     }
 
     // 获取布局函数
@@ -312,6 +364,46 @@ class Layouts {
     }
 
     return current;
+  }
+
+  /**
+   * 获取指定布局函数的预览位置（缩放到 100x100 视口）
+   * @param {string} fnName — 布局函数名称，如 'ARRIVAL', 'WAVE' 等
+   * @param {number} total — 预览的卡片数量
+   * @returns {Array} 缩放后的位置数组 [{x, y, z, rx, ry, rz, scale}]
+   */
+  static getLayoutPreview(fnName, total) {
+    const fn = Layouts[fnName];
+    if (!fn || typeof fn !== 'function') return [];
+
+    const raw = [];
+    for (let i = 0; i < total; i++) {
+      raw.push(fn(i, total));
+    }
+
+    // 计算原始边界
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    for (const p of raw) {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const scaleF = Math.min(100 / rangeX, 100 / rangeY) * 0.9; // 90% 留白
+
+    return raw.map(p => ({
+      x: (p.x - (minX + maxX) / 2) * scaleF + 50,
+      y: (p.y - (minY + maxY) / 2) * scaleF + 50,
+      z: p.z,
+      rx: p.rx,
+      ry: p.ry,
+      rz: p.rz,
+      scale: p.scale,
+    }));
   }
 }
 

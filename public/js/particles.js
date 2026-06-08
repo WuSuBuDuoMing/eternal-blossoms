@@ -12,10 +12,27 @@ class ParticleSystem {
     this.enabled = true;
     this.constantGlow = false;
 
+    // R20: Burst particles array
+    this.burstParticles = [];
+
     // 粒子参数
     this.HEART_COUNT = 90;      // 爱心粒子数量（增加密度）
     this.GLOW_COUNT = 60;       // 光斑粒子数量（增加密度）
     this.hueShift = undefined;  // 场景色相偏移
+    this.currentMode = 'bloom'; // R22: current color mode
+
+    // R22: Color palettes per mode
+    this.colorPalettes = {
+      bloom:     { hue: [330, 360], sat: [70, 100] },
+      memory:    { hue: [200, 240], sat: [50, 90] },
+      starlight: { hue: [40, 60],   sat: [60, 100] },
+      timeline:  { hue: [20, 40],   sat: [50, 80] },
+      garden:    { hue: [100, 140], sat: [40, 80] },
+    };
+
+    // R19: Pre-render glow sprite
+    this._glowSprite = null;
+    this._createGlowSprite();
 
     this._resize();
     window.addEventListener('resize', () => this._resize());
@@ -29,6 +46,25 @@ class ParticleSystem {
     this.canvas.style.width = window.innerWidth + 'px';
     this.canvas.style.height = window.innerHeight + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  /** R19: Pre-render glow sprite to offscreen canvas */
+  _createGlowSprite() {
+    const size = 32;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = size;
+    offscreen.height = size;
+    const octx = offscreen.getContext('2d');
+    const half = size / 2;
+    const grad = octx.createRadialGradient(half, half, 0, half, half, half);
+    grad.addColorStop(0, 'rgba(255, 215, 0, 1)');
+    grad.addColorStop(0.4, 'rgba(255, 200, 50, 0.5)');
+    grad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+    octx.beginPath();
+    octx.arc(half, half, half, 0, Math.PI * 2);
+    octx.fillStyle = grad;
+    octx.fill();
+    this._glowSprite = offscreen;
   }
 
   /** 初始化所有粒子 */
@@ -68,6 +104,7 @@ class ParticleSystem {
       // 粉色系随机
       hue: 330 + Math.random() * 30, // 330-360 粉色范围
       sat: 70 + Math.random() * 30,
+      depth: 0.3 + Math.random() * 0.7, // R21: parallax depth
     };
   }
 
@@ -87,6 +124,7 @@ class ParticleSystem {
       alphaDir: 1,
       pulse: Math.random() * Math.PI * 2,
       pulseSpeed: 0.02 + Math.random() * 0.04,
+      depth: 0.3 + Math.random() * 0.7, // R21: parallax depth
     };
   }
 
@@ -114,7 +152,7 @@ class ParticleSystem {
       if (p.type === 'heart') {
         p.swing += p.swingSpeed;
         p.x += Math.sin(p.swing) * p.swingAmp;
-        p.y += p.speedY;
+        p.y += p.speedY * p.depth; // R21: parallax depth multiplier
         p.rotation += p.rotSpeed;
 
         // Alpha 呼吸效果
@@ -128,7 +166,7 @@ class ParticleSystem {
           p.x = Math.random() * w;
         }
       } else if (p.type === 'glow') {
-        p.y += p.speedY;
+        p.y += p.speedY * p.depth; // R21: parallax depth multiplier
         p.x += p.speedX;
         p.pulse += p.pulseSpeed;
 
@@ -145,6 +183,19 @@ class ParticleSystem {
         if (p.x < -20 || p.x > w + 20) {
           p.x = Math.random() * w;
         }
+      }
+    }
+
+    // R20: Update burst particles
+    for (let i = this.burstParticles.length - 1; i >= 0; i--) {
+      const bp = this.burstParticles[i];
+      bp.x += bp.vx;
+      bp.y += bp.vy;
+      bp.vx *= 0.96;
+      bp.vy *= 0.96;
+      bp.life--;
+      if (bp.life <= 0) {
+        this.burstParticles.splice(i, 1);
       }
     }
   }
@@ -167,7 +218,8 @@ class ParticleSystem {
           ? this.hueShift + (p.hue - 345)
           : p.hue;
         const glowStrength = this.constantGlow ? 1.5 : 1;
-        const alpha = Math.min(1, p.alpha * glowStrength);
+        const depthAlpha = p.alpha * (0.5 + p.depth * 0.5); // R21: depth-based alpha
+        const alpha = Math.min(1, depthAlpha * glowStrength);
 
         ctx.save();
         ctx.translate(p.x, p.y);
@@ -185,7 +237,9 @@ class ParticleSystem {
         ctx.restore();
       } else if (p.type === 'glow') {
         const pulseSize = p.size + Math.sin(p.pulse) * 1.5;
-        const alpha = p.alpha * (this.constantGlow ? 1.5 : 1);
+        const depthAlpha = p.alpha * (0.5 + p.depth * 0.5); // R21: depth-based alpha
+        const alpha = depthAlpha * (this.constantGlow ? 1.5 : 1);
+        const drawSize = pulseSize * 6; // sprite is 32px, scale to desired glow radius
 
         ctx.save();
 
@@ -194,19 +248,26 @@ class ParticleSystem {
           ctx.shadowBlur = 20;
         }
 
-        // 径向渐变光斑
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulseSize * 3);
-        grad.addColorStop(0, `rgba(255, 215, 0, ${alpha})`);
-        grad.addColorStop(0.4, `rgba(255, 200, 50, ${alpha * 0.5})`);
-        grad.addColorStop(1, `rgba(255, 215, 0, 0)`);
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, pulseSize * 3, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
+        // R19: Use pre-rendered glow sprite instead of per-frame gradient
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(this._glowSprite, p.x - drawSize / 2, p.y - drawSize / 2, drawSize, drawSize);
+        ctx.globalAlpha = 1;
 
         ctx.restore();
       }
+    }
+
+    // R20: Draw burst particles
+    for (const bp of this.burstParticles) {
+      const burstAlpha = bp.life / bp.maxLife;
+      ctx.save();
+      ctx.globalAlpha = burstAlpha;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.beginPath();
+      ctx.arc(bp.x, bp.y, bp.size * burstAlpha, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${bp.hue}, 100%, 70%, 1)`;
+      ctx.fill();
+      ctx.restore();
     }
   }
 

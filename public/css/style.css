@@ -75,6 +75,7 @@ html, body {
   justify-content: center;
   background: var(--color-bg);
   transition: opacity 0.8s ease, visibility 0.8s ease;
+  will-change: transform, opacity;
 }
 
 .loader.hidden {
@@ -156,6 +157,7 @@ html, body {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+  will-change: transform, opacity;
 }
 
 .ui-logo.visible {
@@ -205,6 +207,7 @@ html, body {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+  will-change: transform, opacity;
 }
 
 .ui-stage.visible {
@@ -286,6 +289,7 @@ html, body {
   text-transform: uppercase;
   opacity: 0;
   transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+  will-change: transform, opacity;
 }
 
 .ui-hint.visible {
@@ -308,6 +312,7 @@ html, body {
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.6s ease, transform 0.6s var(--transition-smooth);
+  will-change: transform, opacity;
 }
 
 .ui-glow-toggle.visible {
@@ -380,6 +385,7 @@ html, body {
   transform: translateY(20px);
   transition: opacity 0.8s ease, transform 0.8s var(--transition-smooth);
   text-shadow: 0 0 40px rgba(255, 107, 157, 0.3);
+  will-change: transform, opacity;
 }
 
 .poem-text.visible {
@@ -402,6 +408,7 @@ html, body {
   -webkit-backdrop-filter: blur(0px);
   opacity: 0;
   visibility: hidden;
+  contain: layout style;
   transition: background 0.4s ease, backdrop-filter 0.4s ease, opacity 0.4s ease, visibility 0.4s ease;
 }
 
@@ -425,6 +432,7 @@ html, body {
   transform: scale(0.9) translateY(30px);
   transition: transform 0.5s var(--transition-smooth);
   box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+  will-change: transform, opacity;
 }
 
 .modal-overlay.open .modal-card {
@@ -652,6 +660,13 @@ html, body {
   border-color: rgba(255,107,157,0.25);
   color: #ff6b9d;
   box-shadow: 0 0 20px rgba(255,107,157,0.08);
+  animation: btnPulse 0.4s ease-in-out;
+}
+
+@keyframes btnPulse {
+  0%   { transform: scale(1.0); }
+  40%  { transform: scale(1.05); }
+  100% { transform: scale(1.0); }
 }
 
 .scene-btn__icon {
@@ -686,5 +701,105 @@ html, body {
 
   .scene-btn__name {
     font-size: 11px;
+  }
+}
+
+/* ============================================================
+   R9 — 可访问性
+   ============================================================ */
+
+/* --- Focus-visible 交互焦点样式 --- */
+.glow-btn:focus-visible,
+.modal-close:focus-visible,
+.scene-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --- prefers-reduced-motion: 减少动画 --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- prefers-color-scheme: light — 浅色主题覆写 --- */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #f8f5fa;
+    --color-bg-secondary: #ffffff;
+    --color-text: #1a1025;
+    --color-text-muted: rgba(26, 16, 37, 0.55);
+    --color-glass: rgba(0, 0, 0, 0.03);
+    --color-glass-border: rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 40px rgba(255, 107, 157, 0.1);
+  }
+
+  .loader {
+    background: var(--color-bg);
+  }
+
+  .scene-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .scene-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.75);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  .scene-btn--active {
+    background: rgba(255, 107, 157, 0.08);
+    border-color: rgba(255, 107, 157, 0.2);
+    color: #e0557e;
+    box-shadow: 0 0 20px rgba(255, 107, 157, 0.06);
+  }
+
+  .modal-overlay.open {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-card {
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.12), var(--shadow-glow);
+  }
+
+  .glow-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .glow-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(255, 107, 157, 0.25);
+  }
+
+  .glow-btn.active {
+    background: rgba(255, 107, 157, 0.08);
+    border-color: rgba(255, 107, 157, 0.3);
+    color: #e0557e;
+    box-shadow: 0 0 20px rgba(255, 107, 157, 0.1);
+  }
+
+  .ui-progress-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .loader-bar-track {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  .logo-divider {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .hint-separator {
+    color: rgba(0, 0, 0, 0.2);
   }
 }

@@ -1,0 +1,440 @@
+/* ============================================================
+   themes.css — Rounds 71-75: Theme System Styles
+   永恒花海 · ETERNAL BLOSSOMS
+   ============================================================ */
+
+/* ==========================================================
+   R75 — @property declarations for animatable CSS variables
+   These registers let browsers interpolate <color> custom
+   properties via CSS transitions (Chrome 85+, Edge 85+,
+   Safari 15.4+). Fallback: the transition still runs on
+   browsers that don't support @property (the change is
+   instant rather than smooth).
+   ========================================================== */
+
+@property --color-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0a0a12;
+}
+
+@property --color-bg-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #12121e;
+}
+
+@property --color-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f0e6f6;
+}
+
+@property --color-text-muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(240, 230, 246, 0.5);
+}
+
+@property --color-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ff6b9d;
+}
+
+@property --color-accent-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #c084fc;
+}
+
+@property --color-gold {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffd700;
+}
+
+@property --color-glass {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, 0.04);
+}
+
+@property --color-glass-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255, 255, 255, 0.08);
+}
+
+@property --shadow-glow {
+  syntax: '<shadow>';
+  inherits: true;
+  initial-value: 0 0 40px rgba(255, 107, 157, 0.15);
+}
+
+
+/* ==========================================================
+   Global transition rules for theme variable animation
+   The duration is overridden by ThemeManager.transitionTheme()
+   via inline style --transition-duration on :root.
+   ========================================================== */
+
+:root {
+  transition:
+    --color-bg 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-bg-secondary 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-text 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-text-muted 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-accent 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-accent-secondary 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-gold 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-glass 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    --color-glass-border 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* ==========================================================
+   Theme class overrides
+
+   Each .theme-<name> class applies its palette to :root.
+   The ThemeManager JS applies variables via inline style
+   (highest specificity), but these classes serve as:
+
+   1. A CSS-only fallback when JS sets the class without
+      calling setTheme() (e.g. for simple dark/light toggle)
+   2. Documentation of each theme's full palette
+   3. Scoped overrides for elements that need per-theme tweaks
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   Midnight — default dark (current design)
+   ---------------------------------------------------------- */
+.theme-midnight {
+  --color-bg:            #0a0a12;
+  --color-bg-secondary:  #12121e;
+  --color-text:          #f0e6f6;
+  --color-text-muted:    rgba(240, 230, 246, 0.5);
+  --color-accent:        #ff6b9d;
+  --color-accent-secondary: #c084fc;
+  --color-gold:          #ffd700;
+  --color-glass:         rgba(255, 255, 255, 0.04);
+  --color-glass-border:  rgba(255, 255, 255, 0.08);
+  --shadow-glow:         0 0 40px rgba(255, 107, 157, 0.15);
+}
+
+.theme-midnight .scene-btn--active {
+  background: rgba(255, 107, 157, 0.12);
+  border-color: rgba(255, 107, 157, 0.25);
+  color: #ff6b9d;
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.08);
+}
+
+
+/* ----------------------------------------------------------
+   Sakura — pink cherry blossom
+   ---------------------------------------------------------- */
+.theme-sakura {
+  --color-bg:            #1a0f14;
+  --color-bg-secondary:  #2a1520;
+  --color-text:          #fce4ec;
+  --color-text-muted:    rgba(252, 228, 236, 0.5);
+  --color-accent:        #ff85a2;
+  --color-accent-secondary: #f48fb1;
+  --color-gold:          #ffcdd2;
+  --color-glass:         rgba(255, 133, 162, 0.06);
+  --color-glass-border:  rgba(255, 133, 162, 0.12);
+  --shadow-glow:         0 0 40px rgba(255, 133, 162, 0.2);
+}
+
+.theme-sakura .scene-btn--active {
+  background: rgba(255, 133, 162, 0.12);
+  border-color: rgba(255, 133, 162, 0.25);
+  color: #ff85a2;
+  box-shadow: 0 0 20px rgba(255, 133, 162, 0.1);
+}
+
+.theme-sakura .glow-btn.active {
+  background: rgba(255, 133, 162, 0.12);
+  border-color: rgba(255, 133, 162, 0.4);
+  color: #ff85a2;
+  box-shadow: 0 0 20px rgba(255, 133, 162, 0.15);
+}
+
+.theme-sakura .loader-title {
+  background: linear-gradient(135deg, #ff85a2, #f48fb1, #ffcdd2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-sakura .ui-progress-bar {
+  background: linear-gradient(90deg, #ff85a2, #f48fb1, #ffcdd2, #ff85a2);
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px rgba(255, 133, 162, 0.4);
+}
+
+.theme-sakura .loader-bar {
+  background: linear-gradient(90deg, #ff85a2, #f48fb1);
+}
+
+.theme-sakura .poem-text {
+  text-shadow: 0 0 40px rgba(255, 133, 162, 0.3);
+}
+
+
+/* ----------------------------------------------------------
+   Ocean — deep blue
+   ---------------------------------------------------------- */
+.theme-ocean {
+  --color-bg:            #060e18;
+  --color-bg-secondary:  #0c1a2a;
+  --color-text:          #e0f2ff;
+  --color-text-muted:    rgba(224, 242, 255, 0.5);
+  --color-accent:        #4fc3f7;
+  --color-accent-secondary: #0288d1;
+  --color-gold:          #80deea;
+  --color-glass:         rgba(79, 195, 247, 0.05);
+  --color-glass-border:  rgba(79, 195, 247, 0.1);
+  --shadow-glow:         0 0 40px rgba(79, 195, 247, 0.15);
+}
+
+.theme-ocean .scene-btn--active {
+  background: rgba(79, 195, 247, 0.12);
+  border-color: rgba(79, 195, 247, 0.25);
+  color: #4fc3f7;
+  box-shadow: 0 0 20px rgba(79, 195, 247, 0.08);
+}
+
+.theme-ocean .glow-btn.active {
+  background: rgba(79, 195, 247, 0.12);
+  border-color: rgba(79, 195, 247, 0.4);
+  color: #4fc3f7;
+  box-shadow: 0 0 20px rgba(79, 195, 247, 0.15);
+}
+
+.theme-ocean .loader-title {
+  background: linear-gradient(135deg, #4fc3f7, #0288d1, #80deea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-ocean .ui-progress-bar {
+  background: linear-gradient(90deg, #4fc3f7, #0288d1, #80deea, #4fc3f7);
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px rgba(79, 195, 247, 0.4);
+}
+
+.theme-ocean .loader-bar {
+  background: linear-gradient(90deg, #4fc3f7, #0288d1);
+}
+
+.theme-ocean .poem-text {
+  text-shadow: 0 0 40px rgba(79, 195, 247, 0.3);
+}
+
+
+/* ----------------------------------------------------------
+   Forest — green
+   ---------------------------------------------------------- */
+.theme-forest {
+  --color-bg:            #071208;
+  --color-bg-secondary:  #0e1f10;
+  --color-text:          #e8f5e9;
+  --color-text-muted:    rgba(232, 245, 233, 0.5);
+  --color-accent:        #66bb6a;
+  --color-accent-secondary: #43a047;
+  --color-gold:          #aed581;
+  --color-glass:         rgba(102, 187, 106, 0.05);
+  --color-glass-border:  rgba(102, 187, 106, 0.1);
+  --shadow-glow:         0 0 40px rgba(102, 187, 106, 0.15);
+}
+
+.theme-forest .scene-btn--active {
+  background: rgba(102, 187, 106, 0.12);
+  border-color: rgba(102, 187, 106, 0.25);
+  color: #66bb6a;
+  box-shadow: 0 0 20px rgba(102, 187, 106, 0.08);
+}
+
+.theme-forest .glow-btn.active {
+  background: rgba(102, 187, 106, 0.12);
+  border-color: rgba(102, 187, 106, 0.4);
+  color: #66bb6a;
+  box-shadow: 0 0 20px rgba(102, 187, 106, 0.15);
+}
+
+.theme-forest .loader-title {
+  background: linear-gradient(135deg, #66bb6a, #43a047, #aed581);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-forest .ui-progress-bar {
+  background: linear-gradient(90deg, #66bb6a, #43a047, #aed581, #66bb6a);
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px rgba(102, 187, 106, 0.4);
+}
+
+.theme-forest .loader-bar {
+  background: linear-gradient(90deg, #66bb6a, #43a047);
+}
+
+.theme-forest .poem-text {
+  text-shadow: 0 0 40px rgba(102, 187, 106, 0.3);
+}
+
+
+/* ----------------------------------------------------------
+   Sunset — warm orange
+   ---------------------------------------------------------- */
+.theme-sunset {
+  --color-bg:            #140a06;
+  --color-bg-secondary:  #231410;
+  --color-text:          #fbe9e7;
+  --color-text-muted:    rgba(251, 233, 231, 0.5);
+  --color-accent:        #ff8a65;
+  --color-accent-secondary: #ff7043;
+  --color-gold:          #ffcc80;
+  --color-glass:         rgba(255, 138, 101, 0.06);
+  --color-glass-border:  rgba(255, 138, 101, 0.12);
+  --shadow-glow:         0 0 40px rgba(255, 138, 101, 0.2);
+}
+
+.theme-sunset .scene-btn--active {
+  background: rgba(255, 138, 101, 0.12);
+  border-color: rgba(255, 138, 101, 0.25);
+  color: #ff8a65;
+  box-shadow: 0 0 20px rgba(255, 138, 101, 0.08);
+}
+
+.theme-sunset .glow-btn.active {
+  background: rgba(255, 138, 101, 0.12);
+  border-color: rgba(255, 138, 101, 0.4);
+  color: #ff8a65;
+  box-shadow: 0 0 20px rgba(255, 138, 101, 0.15);
+}
+
+.theme-sunset .loader-title {
+  background: linear-gradient(135deg, #ff8a65, #ff7043, #ffcc80);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-sunset .ui-progress-bar {
+  background: linear-gradient(90deg, #ff8a65, #ff7043, #ffcc80, #ff8a65);
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px rgba(255, 138, 101, 0.4);
+}
+
+.theme-sunset .loader-bar {
+  background: linear-gradient(90deg, #ff8a65, #ff7043);
+}
+
+.theme-sunset .poem-text {
+  text-shadow: 0 0 40px rgba(255, 138, 101, 0.3);
+}
+
+
+/* ----------------------------------------------------------
+   Aurora — rainbow gradient / purple
+   ---------------------------------------------------------- */
+.theme-aurora {
+  --color-bg:            #0a0812;
+  --color-bg-secondary:  #16102a;
+  --color-text:          #ede7f6;
+  --color-text-muted:    rgba(237, 231, 246, 0.5);
+  --color-accent:        #ab47bc;
+  --color-accent-secondary: #7c4dff;
+  --color-gold:          #ce93d8;
+  --color-glass:         rgba(171, 71, 188, 0.05);
+  --color-glass-border:  rgba(171, 71, 188, 0.1);
+  --shadow-glow:         0 0 40px rgba(171, 71, 188, 0.2);
+}
+
+.theme-aurora .scene-btn--active {
+  background: rgba(171, 71, 188, 0.12);
+  border-color: rgba(171, 71, 188, 0.25);
+  color: #ab47bc;
+  box-shadow: 0 0 20px rgba(171, 71, 188, 0.08);
+}
+
+.theme-aurora .glow-btn.active {
+  background: rgba(171, 71, 188, 0.12);
+  border-color: rgba(171, 71, 188, 0.4);
+  color: #ab47bc;
+  box-shadow: 0 0 20px rgba(171, 71, 188, 0.15);
+}
+
+.theme-aurora .loader-title {
+  background: linear-gradient(135deg, #ab47bc, #7c4dff, #ce93d8, #448aff);
+  background-size: 300% 300%;
+  animation: auroraGradient 6s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes auroraGradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.theme-aurora .ui-progress-bar {
+  background: linear-gradient(90deg, #ab47bc, #7c4dff, #ce93d8, #448aff, #ab47bc);
+  background-size: 300% 100%;
+  box-shadow: 0 0 12px rgba(171, 71, 188, 0.4);
+}
+
+.theme-aurora .loader-bar {
+  background: linear-gradient(90deg, #ab47bc, #7c4dff);
+}
+
+.theme-aurora .poem-text {
+  text-shadow: 0 0 40px rgba(171, 71, 188, 0.3);
+}
+
+
+/* ==========================================================
+   Theme selector panel — focus & accessibility styles
+   ========================================================== */
+
+#theme-selector button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+#theme-selector button[aria-label] {
+  font-size: 12px;
+}
+
+
+/* ==========================================================
+   Respect prefers-reduced-motion for theme transitions
+   ========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition-duration: 0.01ms !important;
+  }
+
+  :root {
+    transition:
+      --color-bg 0.01ms,
+      --color-bg-secondary 0.01ms,
+      --color-text 0.01ms,
+      --color-text-muted 0.01ms,
+      --color-accent 0.01ms,
+      --color-accent-secondary 0.01ms,
+      --color-gold 0.01ms,
+      --color-glass 0.01ms,
+      --color-glass-border 0.01ms,
+      background-color 0.01ms,
+      color 0.01ms;
+  }
+}

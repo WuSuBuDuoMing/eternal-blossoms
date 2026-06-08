@@ -6,11 +6,32 @@
   <title>永恒花海 · 花海记忆 | ETERNAL BLOSSOMS</title>
   <meta name="description" content="ETERNAL BLOSSOMS — HUA HAI JI YI — 一个沉浸式 3D 照片卡片画廊，用粒子和光为你编织永恒的花海记忆。">
 
+  <!-- Open Graph -->
+  <meta property="og:title" content="永恒花海 · 花海记忆 | ETERNAL BLOSSOMS">
+  <meta property="og:description" content="ETERNAL BLOSSOMS — HUA HAI JI YI — 一个沉浸式 3D 照片卡片画廊，用粒子和光为你编织永恒的花海记忆。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/assets/og-image.png">
+  <meta property="og:url" content="https://example.com">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="永恒花海 · 花海记忆 | ETERNAL BLOSSOMS">
+  <meta name="twitter:description" content="ETERNAL BLOSSOMS — HUA HAI JI YI — 一个沉浸式 3D 照片卡片画廊，用粒子和光为你编织永恒的花海记忆。">
+
+  <!-- PWA Manifest (R39) -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#0a0a12">
+
   <!-- Three.js (本地) -->
   <script src="js/vendor/three.min.js"></script>
 
   <!-- 主样式 -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/effects.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/search.css">
 
   <!-- Favicon（内联 SVG） -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
@@ -31,6 +52,7 @@
   </div>
 
   <!-- ========== 粒子画布（Canvas 2D） ========== -->
+  <main>
   <canvas id="particle-canvas"></canvas>
 
   <!-- ========== Three.js 3D 画布 ========== -->
@@ -69,7 +91,7 @@
   </div>
 
   <!-- 场景模式切换器 -->
-  <div id="scene-switcher" class="scene-switcher">
+  <nav id="scene-switcher" class="scene-switcher" aria-label="场景模式切换">
     <div class="scene-switcher__label">场景模式</div>
     <div class="scene-switcher__list">
       <button class="scene-btn scene-btn--active" data-mode="bloom">
@@ -93,7 +115,7 @@
         <span class="scene-btn__name">永恒花园</span>
       </button>
     </div>
-  </div>
+  </nav>
 
   <!-- 右下角 Constant Glow 开关 -->
   <div id="ui-glow-toggle" class="ui-glow-toggle">
@@ -121,7 +143,7 @@
   </div>
 
   <!-- ========== 卡片详情弹窗 ========== -->
-  <div id="modal-overlay" class="modal-overlay">
+  <div id="modal-overlay" class="modal-overlay" role="dialog" aria-modal="true">
     <div id="modal-card" class="modal-card">
       <button id="modal-close" class="modal-close" aria-label="关闭">&times;</button>
       <div id="modal-emoji" class="modal-emoji"></div>
@@ -133,12 +155,39 @@
     </div>
   </div>
 
+  </main>
+
   <!-- ========== 脚本 ========== -->
+  <!-- Core: no dependencies -->
   <script src="js/particles.js"></script>
   <script src="js/layouts.js"></script>
   <script src="js/scene.js"></script>
   <script src="js/ui.js"></script>
+  <!-- Feature modules: optional, graceful degradation -->
+  <script src="js/audio.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/perf-monitor.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/gestures.js"></script>
+  <!-- Main orchestrator (loads after all modules) -->
   <script src="js/app.js"></script>
+  <script src="js/register-sw.js"></script>
+  <!-- Master initializer (wires everything, must be last) -->
+  <script src="js/app-init.js"></script>
+
+  <!-- No-JS fallback -->
+  <noscript>
+    <div style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#0a0a12;color:#f0e6f6;font-family:'Georgia','SimSun',serif;font-size:18px;text-align:center;padding:40px;line-height:1.8;">
+      <div>
+        <div style="font-size:48px;margin-bottom:16px;">&#x1F338;</div>
+        <p>请启用 JavaScript 以体验永恒花海</p>
+        <p style="font-size:13px;color:rgba(240,230,246,0.4);margin-top:12px;">Please enable JavaScript to experience Eternal Blossoms</p>
+      </div>
+    </div>
+  </noscript>
 
 </body>
 </html>

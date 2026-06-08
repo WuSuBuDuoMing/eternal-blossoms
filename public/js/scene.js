@@ -67,6 +67,11 @@ class SceneManager {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.2;
+    this.renderer.sortObjects = true; // R15: better render order
+
+    // R17: hover highlight state
+    this._hoveredCard = null;
+    this._sceneStartTime = Date.now();
 
     // 光照
     this._setupLights();
@@ -166,15 +171,16 @@ class SceneManager {
    * 为卡片数据创建 CanvasTexture — 照片级艺术卡片
    * 每张卡片使用独特的多层渐变、光斑、纹理，模拟真实照片质感
    */
-  createCardTexture(cardData) {
-    const width = 512;
-    const height = 640;
+  createCardTexture(cardData, quality = 'high') {
+    const width = quality === 'low' ? 256 : 512;
+    const height = quality === 'low' ? 320 : 640;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
     // 圆角矩形辅助
+    const cornerR = quality === 'low' ? 14 : 28;
     const roundRect = (x, y, w, h, r) => {
       ctx.beginPath();
       ctx.moveTo(x + r, y);
@@ -190,7 +196,7 @@ class SceneManager {
     };
 
     // 裁剪为圆角
-    roundRect(0, 0, width, height, 28);
+    roundRect(0, 0, width, height, cornerR);
     ctx.clip();
 
     const c = cardData.color || '#667eea';
@@ -214,37 +220,41 @@ class SceneManager {
     ctx.fillStyle = radialGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // === 第 3 层：散景光斑（Bokeh） ===
-    const bokehCount = 6 + Math.floor(seed % 5);
-    for (let i = 0; i < bokehCount; i++) {
-      const bx = ((seed * (i + 1) * 13.7) % width);
-      const by = ((seed * (i + 1) * 23.3) % height);
-      const br = 20 + ((seed * (i + 1)) % 60);
-      const bAlpha = 0.04 + ((seed * (i + 1) * 7) % 8) / 100;
+    // === 第 3 层：散景光斑（Bokeh）— R16: skip on low quality ===
+    if (quality !== 'low') {
+      const bokehCount = 6 + Math.floor(seed % 5);
+      for (let i = 0; i < bokehCount; i++) {
+        const bx = ((seed * (i + 1) * 13.7) % width);
+        const by = ((seed * (i + 1) * 23.3) % height);
+        const br = 20 + ((seed * (i + 1)) % 60);
+        const bAlpha = 0.04 + ((seed * (i + 1) * 7) % 8) / 100;
 
-      const bokehGrad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
-      bokehGrad.addColorStop(0, `rgba(255, 255, 255, ${bAlpha * 2})`);
-      bokehGrad.addColorStop(0.5, `rgba(255, 255, 255, ${bAlpha})`);
-      bokehGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = bokehGrad;
-      ctx.beginPath();
-      ctx.arc(bx, by, br, 0, Math.PI * 2);
-      ctx.fill();
+        const bokehGrad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+        bokehGrad.addColorStop(0, `rgba(255, 255, 255, ${bAlpha * 2})`);
+        bokehGrad.addColorStop(0.5, `rgba(255, 255, 255, ${bAlpha})`);
+        bokehGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = bokehGrad;
+        ctx.beginPath();
+        ctx.arc(bx, by, br, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
-    // === 第 4 层：彩色光斑（暖色调） ===
-    const warmColors = ['rgba(255,180,120,0.06)', 'rgba(255,150,200,0.05)', 'rgba(200,180,255,0.05)', 'rgba(255,220,100,0.04)'];
-    for (let i = 0; i < 3; i++) {
-      const wx = ((seed * (i + 3) * 17.1) % width);
-      const wy = ((seed * (i + 3) * 29.3) % height);
-      const wr = 40 + ((seed * (i + 3)) % 80);
-      const wGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, wr);
-      wGrad.addColorStop(0, warmColors[i % warmColors.length]);
-      wGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = wGrad;
-      ctx.beginPath();
-      ctx.arc(wx, wy, wr, 0, Math.PI * 2);
-      ctx.fill();
+    // === 第 4 层：彩色光斑（暖色调）— R16: skip on low quality ===
+    if (quality !== 'low') {
+      const warmColors = ['rgba(255,180,120,0.06)', 'rgba(255,150,200,0.05)', 'rgba(200,180,255,0.05)', 'rgba(255,220,100,0.04)'];
+      for (let i = 0; i < 3; i++) {
+        const wx = ((seed * (i + 3) * 17.1) % width);
+        const wy = ((seed * (i + 3) * 29.3) % height);
+        const wr = 40 + ((seed * (i + 3)) % 80);
+        const wGrad = ctx.createRadialGradient(wx, wy, 0, wx, wy, wr);
+        wGrad.addColorStop(0, warmColors[i % warmColors.length]);
+        wGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = wGrad;
+        ctx.beginPath();
+        ctx.arc(wx, wy, wr, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // === 第 5 层：对角光线 ===
@@ -435,7 +445,7 @@ class SceneManager {
     const geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
 
     cardsData.forEach((card, i) => {
-      const texture = this.createCardTexture(card);
+      const texture = this.createCardTexture(card, 'high');
 
       const material = new THREE.MeshStandardMaterial({
         map: texture,
@@ -449,7 +459,16 @@ class SceneManager {
       });
 
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.userData = { cardData: card, index: i, targetOpacity: 1 };
+      mesh.frustumCulled = true; // R15: enable frustum culling
+      mesh.userData = {
+        cardData: card,
+        index: i,
+        targetOpacity: 1,        // R18: fade-in target
+        fadeDelay: i * 0.05,     // R18: stagger delay (seconds)
+        quality: 'high',         // R16: current texture quality
+        originalScale: 1,        // R17: store original scale
+        originalEmissiveIntensity: 0.12, // R17: store original emissive
+      };
 
       // 初始位置：远处
       mesh.position.set(
@@ -468,9 +487,28 @@ class SceneManager {
    * 更新卡片位置（由外部调用，传入布局位置数组）
    */
   updateCardPositions(positions) {
+    const elapsed = (Date.now() - this._sceneStartTime) / 1000; // seconds since init
+
     for (let i = 0; i < this.cards.length && i < positions.length; i++) {
       const mesh = this.cards[i];
       const pos = positions[i];
+
+      // R18: staggered fade-in — only start fading after fadeDelay has elapsed
+      if (elapsed < mesh.userData.fadeDelay) {
+        mesh.userData.targetOpacity = 0;
+      } else {
+        mesh.userData.targetOpacity = 1;
+      }
+
+      // R16: LOD — switch to low quality texture for far-away cards
+      const distFromCamera = this.camera.position.distanceTo(mesh.position);
+      const newQuality = distFromCamera > 25 ? 'low' : 'high';
+      if (mesh.userData.quality !== newQuality) {
+        mesh.material.map?.dispose();
+        mesh.material.map = this.createCardTexture(mesh.userData.cardData, newQuality);
+        mesh.material.needsUpdate = true;
+        mesh.userData.quality = newQuality;
+      }
 
       // 平滑插值到目标位置
       const lerp = 0.06; // 插值速度
@@ -483,11 +521,17 @@ class SceneManager {
       mesh.rotation.y += (pos.ry - mesh.rotation.y) * lerp;
       mesh.rotation.z += (pos.rz - mesh.rotation.z) * lerp;
 
-      // 缩放插值
+      // 缩放插值 — R17: use hover scale if hovered, otherwise layout scale
       const s = pos.scale;
-      mesh.scale.x += (s - mesh.scale.x) * lerp;
-      mesh.scale.y += (s - mesh.scale.y) * lerp;
-      mesh.scale.z += (s - mesh.scale.z) * lerp;
+      const baseScale = mesh.userData._hovered ? s * 1.05 : s;
+      mesh.userData.originalScale = s; // R17: keep track of layout scale
+      mesh.scale.x += (baseScale - mesh.scale.x) * lerp;
+      mesh.scale.y += (baseScale - mesh.scale.y) * lerp;
+      mesh.scale.z += (baseScale - mesh.scale.z) * lerp;
+
+      // R17: emissive intensity on hover
+      const targetEmissive = mesh.userData._hovered ? 0.35 : mesh.userData.originalEmissiveIntensity;
+      mesh.material.emissiveIntensity += (targetEmissive - mesh.material.emissiveIntensity) * 0.1;
 
       // 淡入（lerp，帧率无关）
       mesh.material.opacity += (mesh.userData.targetOpacity - mesh.material.opacity) * 0.05;
@@ -574,6 +618,30 @@ class SceneManager {
         touchDist = 0;
       }
     }, { passive: true });
+
+    // R17: Hover highlight via mousemove raycasting
+    this.canvas.addEventListener('mousemove', (e) => {
+      if (this.isDragging) return;
+      const mx = (e.clientX / window.innerWidth) * 2 - 1;
+      const my = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      this.raycaster.setFromCamera({ x: mx, y: my }, this.camera);
+      const intersects = this.raycaster.intersectObjects(this.cards);
+
+      // Un-hover previous card
+      if (this._hoveredCard && this._hoveredCard !== (intersects.length > 0 ? intersects[0].object : null)) {
+        this._hoveredCard.userData._hovered = false;
+        this._hoveredCard = null;
+        this.canvas.style.cursor = 'default';
+      }
+
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        hit.userData._hovered = true;
+        this._hoveredCard = hit;
+        this.canvas.style.cursor = 'pointer';
+      }
+    });
 
     // 双击检测
     this.canvas.addEventListener('dblclick', (e) => {
