@@ -1,9 +1,13 @@
-# :cherry_blossom: 永恒花海 · 花海记忆 :cherry_blossom:
+# :cherry_blossom: Eternal Blossoms :cherry_blossom:
 
-<h3 align="center">ETERNAL BLOSSOMS -- HUA HAI JI YI</h3>
+<h3 align="center">ETERNAL BLOSSOMS &mdash; AN IMMERSIVE 3D PHOTO CARD GALLERY</h3>
 
 <p align="center">
-  <em>一个基于 Three.js 的沉浸式 3D 照片卡片画廊。<br>用粒子和光为你编织永恒的花海记忆。</em>
+  <em>An immersive 3D photo card gallery built with Three.js.<br>Weaving eternal memories with particles and light.</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/WuSuBuDuoMing/eternal-blossoms/blob/main/README.zh-CN.md">Chinese (中文)</a> &nbsp;|&nbsp; English
 </p>
 
 <p align="center">
@@ -13,148 +17,151 @@
   <img src="https://img.shields.io/badge/Express-4.18-red?logo=express&logoColor=white" alt="Express 4.18">
   <img src="https://img.shields.io/badge/WebGL-Required-orange" alt="WebGL Required">
   <img src="https://img.shields.io/badge/PWA-Enabled-purple" alt="PWA Enabled">
+  <img src="https://img.shields.io/badge/stable-v1.1.0-blue" alt="Version">
 </p>
 
 ---
 
-## :sparkles: 功能特性
+## :sparkles: Features
 
-### :camera: 3D 布局与场景
+### :camera: 3D Layouts & Scenes
 
-| 特性 | 描述 |
-|------|------|
-| :cyclone: **7 种 3D 布局模式** | ARRIVAL (晨曦初临), FAN (卷帘展开), GATHER (同心汇聚), WAVE (正弦波动), GRID (网格呼吸), SPIRAL (螺旋花涡), DEPART (永恒归宿) -- 通过滚动平滑切换 |
-| :art: **5 种场景模式** | 花海漫游 (bloom), 记忆照片墙 (memory), 星光告白 (starlight), 时间长廊 (timeline), 永恒花园 (garden) -- 各有独立配色和氛围 |
-| :sparkling_heart: **Canvas 2D 粒子系统** | 90 个粉色爱心粒子 + 60 个金色光斑粒子，持续飘落、摇摆、旋转、渐隐动画，支持 Constant Glow 模式 |
-| :frame_photo: **CanvasTexture 卡片** | 将卡片信息渲染为 Three.js 纹理 -- 圆角边框、emoji、中英文标题、描述文字 |
+| Feature | Description |
+|---------|-------------|
+| :cyclone: **7 Layout Modes** | ARRIVAL, FAN, GATHER, WAVE, GRID, SPIRAL, DEPART &mdash; smooth transitions via scrolling |
+| :art: **5 Scene Modes** | bloom (Blossom Walk), memory (Memory Wall), starlight (Starlight Confession), timeline (Time Corridor), garden (Eternal Garden) &mdash; each with unique color palettes and atmosphere |
+| :sparkling_heart: **Canvas 2D Particle System** | 90 pink heart particles + 60 golden sparkle particles with continuous falling, swaying, rotation, and fade animations; supports Constant Glow mode |
+| :frame_photo: **CanvasTexture Cards** | Card information rendered as Three.js textures &mdash; rounded borders, emoji, bilingual titles, and descriptions |
 
-### :video_game: 交互与控制
+### :video_game: Interaction & Controls
 
-| 交互方式 | 说明 |
-|----------|------|
-| :mouse: 滚轮 | 控制场景进度切换（带智能吸附） |
-| :point_up_2: 鼠标拖拽 | 3D 视角旋转 |
-| :mag: 双指缩放 | 触摸屏双指缩放镜头 |
-| :point_down: 双击卡片 | 弹出卡片详情弹窗 |
-| :keyboard: 键盘快捷键 | 方向键/空格/数字键/全屏等 (见下表) |
-| :point_up: 触摸屏 | 滑动切换 + 双指缩放 |
-| :mag_right: 搜索与筛选 | 按关键词、分类、标签搜索筛选卡片 |
-| :closed_book: 卡片排序 | 按 sortWeight 或字母排序 |
+| Input Method | Description |
+|--------------|-------------|
+| :mouse: Scroll Wheel | Controls scene progress transitions (with intelligent snapping) |
+| :point_up_2: Mouse Drag | 3D perspective rotation |
+| :mag: Pinch to Zoom | Touchscreen dual-finger camera zoom |
+| :point_down: Double-tap Card | Opens card detail modal |
+| :keyboard: Keyboard Shortcuts | Arrow keys / space / number keys / fullscreen (see table below) |
+| :point_up: Touch Gestures | Swipe to navigate + pinch to zoom |
+| :mag_right: Search & Filter | Search and filter cards by keyword, category, and tags |
+| :closed_book: Card Sorting | Sort by `sortWeight` or alphabetically |
 
-### :gem: 高级功能
+### :gem: Advanced Features
 
-| 功能 | 技术 |
-|------|------|
-| :performing_arts: **主题系统** | 6 种主题 (花海/记忆/星光/时间/花园 + 默认) -- 粒子配色随场景切换 |
-| :globe_with_meridians: **国际化 (i18n)** | 中文 / English 双语支持 |
-| :iphone: **PWA 支持** | Service Worker 离线缓存，可安装到桌面 |
-| :sound: **Web Audio 音效** | 环境音生成 + UI 交互音效 + 音乐可视化 (AnalyserNode) |
-| :chart_with_upwards_trend: **性能监控** | 帧率/内存/加载时间追踪，SimpleAnalytics 轻量分析 |
-| :lock: **安全头** | X-Content-Type-Options, X-Frame-Options, XSS Protection, CSP |
-| :electric_plug: **ETag 缓存** | API 响应支持 304 Not Modified |
+| Feature | Technology |
+|---------|------------|
+| :performing_arts: **Theme System** | 6 themes (bloom / memory / starlight / timeline / garden + default) &mdash; particle colors sync with scene transitions |
+| :globe_with_meridians: **Internationalization (i18n)** | Chinese / English bilingual support |
+| :iphone: **PWA Support** | Service Worker offline caching, installable to home screen |
+| :sound: **Web Audio** | Ambient sound generation + UI interaction SFX + music visualization (AnalyserNode) |
+| :chart_with_upwards_trend: **Performance Monitoring** | FPS / memory / load-time tracking, lightweight SimpleAnalytics integration |
+| :lock: **Security Headers** | X-Content-Type-Options, X-Frame-Options, XSS Protection, CSP |
+| :electric_plug: **ETag Caching** | API responses support `304 Not Modified` |
 
 ---
 
-## :camera_flash: 屏幕截图
+## :camera_flash: Screenshots
 
-> 截图占位 -- 请替换为实际截图
+> Screenshots placeholder &mdash; replace with actual screenshots.
 
-| 花海漫游 | 记忆照片墙 | 星光告白 |
+| Blossom Walk | Memory Wall | Starlight Confession |
 |:---:|:---:|:---:|
 | ![bloom](screenshots/bloom.png) | ![memory](screenshots/memory.png) | ![starlight](screenshots/starlight.png) |
 
-| 时间长廊 | 永恒花园 | 卡片详情 |
+| Time Corridor | Eternal Garden | Card Detail Modal |
 |:---:|:---:|:---:|
 | ![timeline](screenshots/timeline.png) | ![garden](screenshots/garden.png) | ![modal](screenshots/modal.png) |
 
 ---
 
-## :rocket: 快速启动
+## :rocket: Quick Start
 
-### 前置要求
+### Prerequisites
 
 - **Node.js** >= 16.0
 - **npm** >= 8.0
-- 支持 **WebGL** 的现代浏览器 (Chrome 90+ / Firefox 88+ / Safari 14+ / Edge 90+)
+- A modern browser with **WebGL** support (Chrome 90+ / Firefox 88+ / Safari 14+ / Edge 90+)
 
-### 安装与运行
+### Installation & Running
 
 ```bash
-# 1. 克隆仓库
+# 1. Clone the repository
 git clone https://github.com/WuSuBuDuoMing/eternal-blossoms.git
 cd eternal-blossoms
 
-# 2. 安装依赖
+# 2. Install dependencies
 npm install
 
-# 3. 启动服务
+# 3. Start the server
 npm start
 
-# 4. 打开浏览器访问
+# 4. Open in your browser
 open http://localhost:3002
 ```
 
-### 开发模式
+### Development Mode
 
 ```bash
 npm run dev
 ```
 
-### 环境变量
+### Environment Variables
 
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `PORT` | `3002` | 服务器监听端口 |
-| `CORS_ORIGIN` | `*` | 允许的跨域来源 |
-| `NODE_ENV` | `development` | 运行环境 (`production` / `development`) |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3002` | Server listen port |
+| `CORS_ORIGIN` | `*` | Allowed CORS origins |
+| `NODE_ENV` | `development` | Runtime environment (`production` / `development`) |
 
 ---
 
-## :building_construction: 项目架构
+## :building_construction: Project Architecture
 
 ```
 02-Eternal-Blossoms/
 |
-|-- package.json              # 项目配置与依赖声明
-|-- server.js                 # Express 服务端入口 (安全头 + 日志 + CORS + 错误处理)
-|-- README.md                 # 本文件
-|-- CHANGELOG.md              # 版本变更日志
-|-- CONTRIBUTING.md           # 贡献指南
+|-- package.json              # Project configuration & dependency declarations
+|-- server.js                 # Express server entry point (security headers + logging + CORS + error handling)
+|-- README.md                 # This file (English)
+|-- README.zh-CN.md           # Chinese README
+|-- CHANGELOG.md              # Version changelog
+|-- CONTRIBUTING.md           # Contribution guidelines
 |
 |-- data/
-|   +-- cards.json            # 24 张预置卡片数据 (id/title/desc/emoji/gradient/tags)
+|   +-- cards.json            # 24 preset card data (id/title/desc/emoji/gradient/tags)
 |
 |-- routes/
-|   +-- api.js                # RESTful API 路由 (/api/cards, /api/cards/:id, /api/health)
+|   +-- api.js                # RESTful API routes (/api/cards, /api/cards/:id, /api/health)
 |
 +-- public/
-    |-- index.html            # 主页面 (加载画面 + Canvas 层 + UI 覆盖层 + 弹窗)
-    |-- sw.js                 # Service Worker (离线缓存)
-    |-- manifest.json         # PWA 清单文件
+    |-- index.html            # Main page (loading screen + Canvas layer + UI overlay + modals)
+    |-- sw.js                 # Service Worker (offline caching)
+    |-- manifest.json         # PWA manifest file
     |
     |-- css/
-    |   +-- style.css         # 全局样式 (布局/动画/响应式/暗色主题)
+    |   +-- style.css         # Global styles (layout/animations/responsive/dark theme)
     |
     +-- js/
-        |-- app.js            # 主入口 (数据加载 + 子系统初始化 + 渲染循环 + 状态管理)
-        |-- scene.js          # SceneManager -- Three.js 3D 场景 (相机/光照/卡片纹理/射线检测)
-        |-- particles.js      # ParticleSystem -- Canvas 2D 粒子 (爱心/光斑/爆发效果)
-        |-- layouts.js        # Layouts -- 7 种布局模式数学算法 (ARRIVAL~DEPART)
-        |-- ui.js             # UIController -- 交互控制 (滚轮/键盘/触摸/弹窗/进度/诗句/主题)
-        |-- audio.js          # AudioManager -- Web Audio API (环境音/音效/可视化)
-        |-- analytics.js      # SimpleAnalytics -- 轻量分析 (事件/会话/性能/卡片浏览)
-        |-- register-sw.js    # Service Worker 注册与更新检测
+        |-- app.js            # Main entry (data loading + subsystem init + render loop + state management)
+        |-- scene.js          # SceneManager -- Three.js 3D scene (camera/lighting/card textures/raycasting)
+        |-- particles.js      # ParticleSystem -- Canvas 2D particles (hearts/sparkles/burst effects)
+        |-- layouts.js        # Layouts -- 7 layout mode math algorithms (ARRIVAL ~ DEPART)
+        |-- ui.js             # UIController -- Interaction controls (scroll/keyboard/touch/modals/progress/poetry/themes)
+        |-- audio.js          # AudioManager -- Web Audio API (ambient sound/SFX/visualization)
+        |-- analytics.js      # SimpleAnalytics -- Lightweight analytics (events/sessions/performance/card views)
+        |-- register-sw.js    # Service Worker registration & update detection
         |
         +-- vendor/
-            +-- three.min.js  # Three.js r158 (本地 CDN 备份)
+            +-- three.min.js  # Three.js r158 (local CDN fallback)
 ```
 
-### 模块依赖关系
+### Module Dependency Graph
 
 ```
                   +-----------------+
                   |    app.js       |
-                  | (主入口/协调器)   |
+                  | (Main Entry /   |
+                  |  Orchestrator)  |
                   +--------+--------+
                            |
             +--------------+--------------+
@@ -180,15 +187,15 @@ npm run dev
 
 ---
 
-## :globe_with_meridians: API 参考
+## :globe_with_meridians: API Reference
 
-所有 API 端点位于 `/api` 路径下，支持 CORS 和 ETag 缓存。
+All API endpoints are located under the `/api` path with CORS and ETag caching support.
 
 ### `GET /api/health`
 
-健康检查端点。
+Health check endpoint.
 
-**响应:**
+**Response:**
 
 ```json
 {
@@ -200,12 +207,12 @@ npm run dev
 
 ### `GET /api/cards`
 
-获取所有卡片数据。
+Retrieve all card data.
 
-- **缓存:** `Cache-Control: public, max-age=300` (5 分钟)
-- **ETag:** 支持 `If-None-Match` 请求头，命中返回 `304 Not Modified`
+- **Cache:** `Cache-Control: public, max-age=300` (5 minutes)
+- **ETag:** Supports `If-None-Match` request header; returns `304 Not Modified` on cache hit
 
-**响应:**
+**Response:**
 
 ```json
 {
@@ -217,7 +224,7 @@ npm run dev
       "title": "安静浅笑",
       "titleEn": "QUIET SMILE",
       "desc": "你在餐桌前安静浅笑的那一刻，时间仿佛静止成了永恒。",
-      "emoji": "😊",
+      "emoji": "\u{1f60a}",
       "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       "color": "#667eea",
       "category": "日常",
@@ -230,12 +237,12 @@ npm run dev
 
 ### `GET /api/cards/:id`
 
-获取单张卡片详情。
+Retrieve a single card's details.
 
-- **参数:** `id` (正整数)
-- **缓存:** `Cache-Control: public, max-age=600` (10 分钟)
+- **Parameters:** `id` (positive integer)
+- **Cache:** `Cache-Control: public, max-age=600` (10 minutes)
 
-**成功响应:**
+**Success Response:**
 
 ```json
 {
@@ -245,7 +252,7 @@ npm run dev
     "title": "安静浅笑",
     "titleEn": "QUIET SMILE",
     "desc": "你在餐桌前安静浅笑的那一刻，时间仿佛静止成了永恒。",
-    "emoji": "😊",
+    "emoji": "\u{1f60a}",
     "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     "color": "#667eea",
     "category": "日常",
@@ -255,73 +262,73 @@ npm run dev
 }
 ```
 
-**错误响应:**
+**Error Responses:**
 
-| 状态码 | 说明 |
-|--------|------|
-| `400` | 无效的卡片 ID |
-| `404` | 卡片不存在 |
-
----
-
-## :keyboard: 键盘快捷键
-
-| 按键 | 功能 |
-|------|------|
-| `Arrow Right` / `Arrow Down` / `Space` | 前进 2% |
-| `Arrow Left` / `Arrow Up` | 后退 2% |
-| `Home` | 跳转到起始 (0%) |
-| `End` | 跳转到终点 (100%) |
-| `1` - `5` | 切换场景模式 (花海/记忆/星光/时间/花园) |
-| `F` | 切换全屏 |
-| `Escape` | 关闭弹窗 |
-| `?` | 显示快捷键帮助 |
+| Status Code | Description |
+|-------------|-------------|
+| `400` | Invalid card ID |
+| `404` | Card not found |
 
 ---
 
-## :wrench: 自定义配置
+## :keyboard: Keyboard Shortcuts
 
-### 卡片数据
-
-修改 `data/cards.json` 自定义卡片内容。每张卡片需要以下字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `id` | `number` | 唯一标识 |
-| `title` | `string` | 中文标题 |
-| `titleEn` | `string` | 英文标题 |
-| `desc` | `string` | 诗意描述 |
-| `emoji` | `string` | 表情图标 |
-| `gradient` | `string` | CSS 渐变值 |
-| `color` | `string` | 主色调 (十六进制) |
-| `category` | `string` | 分类标签 |
-| `tags` | `string[]` | 搜索标签数组 |
-| `sortWeight` | `number` | 排序权重 (越大越靠前) |
-
-### 添加新卡片
-
-1. 在 `data/cards.json` 数组中添加新对象
-2. 确保 `id` 唯一
-3. 重启服务器 (`npm start`)
-4. 刷新页面即可看到新卡片
+| Key | Action |
+|-----|--------|
+| `Arrow Right` / `Arrow Down` / `Space` | Advance 2% |
+| `Arrow Left` / `Arrow Up` | Go back 2% |
+| `Home` | Jump to start (0%) |
+| `End` | Jump to end (100%) |
+| `1` - `5` | Switch scene mode (bloom / memory / starlight / timeline / garden) |
+| `F` | Toggle fullscreen |
+| `Escape` | Close modal |
+| `?` | Show keyboard shortcuts help |
 
 ---
 
-## :test_tube: 浏览器兼容性
+## :wrench: Customization
 
-| 浏览器 | 最低版本 | 状态 |
-|--------|---------|------|
-| Google Chrome | 90+ | :white_check_mark: 完全支持 |
-| Mozilla Firefox | 88+ | :white_check_mark: 完全支持 |
-| Apple Safari | 14+ | :white_check_mark: 完全支持 |
-| Microsoft Edge | 90+ | :white_check_mark: 完全支持 |
-| 移动端浏览器 | 最新版本 | :white_check_mark: 支持 (触摸交互) |
+### Card Data
 
-> :warning: **前提条件:** 浏览器必须支持 WebGL。可在 [get.webgl.org](https://get.webgl.org/) 检测。
+Edit `data/cards.json` to customize card content. Each card requires the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `number` | Unique identifier |
+| `title` | `string` | Chinese title |
+| `titleEn` | `string` | English title |
+| `desc` | `string` | Poetic description |
+| `emoji` | `string` | Emoji icon |
+| `gradient` | `string` | CSS gradient value |
+| `color` | `string` | Primary color (hex) |
+| `category` | `string` | Category label |
+| `tags` | `string[]` | Search tag array |
+| `sortWeight` | `number` | Sort weight (higher = more prominent) |
+
+### Adding New Cards
+
+1. Add a new object to the `data/cards.json` array
+2. Ensure the `id` is unique
+3. Restart the server (`npm start`)
+4. Refresh the page to see the new card
 
 ---
 
-## :hammer_and_wrench: 技术栈
+## :test_tube: Browser Compatibility
+
+| Browser | Minimum Version | Status |
+|---------|-----------------|--------|
+| Google Chrome | 90+ | :white_check_mark: Fully supported |
+| Mozilla Firefox | 88+ | :white_check_mark: Fully supported |
+| Apple Safari | 14+ | :white_check_mark: Fully supported |
+| Microsoft Edge | 90+ | :white_check_mark: Fully supported |
+| Mobile Browsers | Latest version | :white_check_mark: Supported (touch interactions) |
+
+> :warning: **Requirement:** The browser must support WebGL. Check at [get.webgl.org](https://get.webgl.org/).
+
+---
+
+## :hammer_and_wrench: Tech Stack
 
 <p align="center">
   <img src="https://img.shields.io/badge/Three.js-3D_Engine-black?logo=threedotjs" alt="Three.js">
@@ -332,40 +339,40 @@ npm run dev
   <img src="https://img.shields.io/badge/PWA-Offline-green" alt="PWA">
 </p>
 
-| 层级 | 技术 | 用途 |
-|------|------|------|
-| 后端 | Node.js + Express | 静态文件服务 + REST API |
-| 3D 引擎 | Three.js (r158) + WebGL | 场景渲染、卡片纹理、光照、射线检测 |
-| 粒子效果 | Canvas 2D | 爱心粒子 + 光斑粒子 + 爆发效果 |
-| 音频 | Web Audio API | 环境音生成 + UI 音效 + 音频可视化 |
-| 数据存储 | JSON 文件 | 卡片数据 + REST API |
-| 离线支持 | Service Worker + PWA | 离线缓存 + 可安装 |
-| 安全 | Express 中间件 | 安全头 + CORS + 错误处理 |
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Backend | Node.js + Express | Static file serving + REST API |
+| 3D Engine | Three.js (r158) + WebGL | Scene rendering, card textures, lighting, raycasting |
+| Particle Effects | Canvas 2D | Heart particles + sparkle particles + burst effects |
+| Audio | Web Audio API | Ambient sound generation + UI SFX + audio visualization |
+| Data Store | JSON File | Card data + REST API |
+| Offline Support | Service Worker + PWA | Offline caching + installable |
+| Security | Express Middleware | Security headers + CORS + error handling |
 
 ---
 
-## :handshake: 贡献
+## :handshake: Contributing
 
-欢迎贡献! 请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解:
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on:
 
-- 开发环境搭建
-- 代码风格规范
-- Pull Request 流程
-- Issue 模板
+- Setting up the development environment
+- Code style guidelines
+- Pull request process
+- Issue templates
 
 ---
 
-## :scroll: 更新日志
+## :scroll: Changelog
 
-详细的版本变更记录请查看 [CHANGELOG.md](CHANGELOG.md)。
+For a detailed version history, see [CHANGELOG.md](CHANGELOG.md).
 
-**最新版本: v1.1.0** -- 经过 100 轮优化周期，包含性能提升、安全加固、PWA 支持、音效系统、分析追踪等全面增强。
+**Latest version: v1.1.0** &mdash; Refined through 100 optimization cycles, featuring performance improvements, security hardening, PWA support, audio system, analytics tracking, and comprehensive enhancements.
 
 ---
 
 ## :page_facing_up: License
 
-本项目基于 [MIT License](LICENSE) 开源。
+This project is licensed under the [MIT License](LICENSE).
 
 ```
 MIT License
@@ -394,5 +401,9 @@ SOFTWARE.
 ---
 
 <p align="center">
-  <em>:cherry_blossom: 花开花落间，永恒在呼吸 :cherry_blossom:</em>
+  <a href="https://github.com/WuSuBuDuoMing/eternal-blossoms">GitHub Repository</a>
+</p>
+
+<p align="center">
+  <em>:cherry_blossom: Amid the falling petals, eternity breathes. :cherry_blossom:</em>
 </p>

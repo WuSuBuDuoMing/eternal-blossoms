@@ -888,10 +888,15 @@
       selectedFile = file;
       originalSize = file.size;
 
+      // 立即显示表单
+      uploadForm.classList.add('visible');
+
       // Show preview immediately with original
       var reader = new FileReader();
       reader.onload = function (e) {
         previewImage.src = e.target.result;
+        // 先用原始文件作为 fallback（压缩失败也能上传）
+        compressedDataUrl = e.target.result;
 
         // Auto-fill title from filename
         var name = file.name.replace(/\.[^.]+$/, '');
@@ -900,6 +905,9 @@
 
         // Compress
         compressImage(file);
+      };
+      reader.onerror = function () {
+        showToast('文件读取失败', 'error');
       };
       reader.readAsDataURL(file);
     }
@@ -945,6 +953,9 @@
 
         // Enable submit
         btnSubmit.disabled = false;
+
+        // Show the upload form
+        uploadForm.classList.add('visible');
       };
 
       img.onerror = function () {

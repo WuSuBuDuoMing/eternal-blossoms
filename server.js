@@ -60,8 +60,16 @@ app.use('/api', apiRoutes);
 app.use('/api', cardsExtra);
 app.use('/api', uploadRoutes);
 
-// 静态文件服务 — public 目录
-app.use(express.static(path.join(__dirname, 'public')));
+// 静态文件服务 — public 目录（开发环境禁用缓存）
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
 
 // SPA 回退 — 所有非 API 请求返回 index.html
 app.get('*', (req, res) => {
