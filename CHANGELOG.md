@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-06-10
+
+### Added
+- English README with comprehensive documentation and architecture diagrams
+- Chinese README (README.zh-CN.md)
+- GitHub Actions CI workflow (validate + multi-version build)
+- Issue templates (Bug Report, Feature Request)
+- Pull Request template
+- MIT LICENSE file
+- CONTRIBUTING.md (bilingual English/Chinese)
+- CHANGELOG.md (this file)
+- npm package (`eternal-blossoms`) published to npm registry
+- npm publish workflow (publish.yml)
+- Website and Topics added to GitHub repository
+- Multi-platform installation guide (macOS, Linux, Windows, Docker, PWA)
+
+### Changed
+- Repository made public for open-source community
+- All commit authors unified to WuSuBuDuoMing
+
+---
+
 ## [1.1.0] - 2026-06-08
 
 ### :star: Major -- 100 Round Optimization Cycle
@@ -114,5 +136,6 @@ The first stable release of Eternal Blossoms -- a Three.js-powered immersive 3D 
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.2.0 | 2026-06-10 | Open-source release: English docs, CI, templates, LICENSE, npm publish |
 | 1.1.0 | 2026-06-08 | 100-round optimization: PWA, audio, analytics, security, i18n, themes, search, 7 layouts |
 | 1.0.0 | 2026-05-01 | Initial release: 3D gallery with 6 layouts, particles, 24 cards, Express API |
