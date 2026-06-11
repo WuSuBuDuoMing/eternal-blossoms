@@ -574,50 +574,5 @@
       "永恒"
     ],
     "sortWeight": 100
-  },
-  {
-    "id": 37,
-    "title": "����",
-    "titleEn": "����",
-    "desc": "",
-    "emoji": "🌸",
-    "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    "color": "#ff6b9d",
-    "category": "日常",
-    "tags": [],
-    "image": "/photos/card-1780933225450-0eab91fe.jpg",
-    "sortWeight": 50,
-    "createdAt": "2026-06-08T15:40:25.453Z"
-  },
-  {
-    "id": 38,
-    "title": "�����ϴ�",
-    "titleEn": "TEST UPLOAD",
-    "desc": "����һ�Ų�����Ƭ",
-    "emoji": "🌺",
-    "gradient": "linear-gradient(135deg, #ff6b9d 0%, #c084fc 100%)",
-    "color": "#ff6b9d",
-    "category": "�ճ�",
-    "tags": [
-      "����",
-      "�ϴ�"
-    ],
-    "image": "/photos/card-1780933268695-397eddb3.jpg",
-    "sortWeight": 50,
-    "createdAt": "2026-06-08T15:41:08.995Z"
-  },
-  {
-    "id": 39,
-    "title": "test",
-    "titleEn": "TEST",
-    "desc": "",
-    "emoji": "🌸",
-    "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    "color": "#ff6b9d",
-    "category": "日常",
-    "tags": [],
-    "image": "/photos/card-1780933269169-2df7c1e3.jpg",
-    "sortWeight": 50,
-    "createdAt": "2026-06-08T15:41:09.173Z"
   }
 ]

@@ -4,7 +4,7 @@
  * R42: Offline fallback with embedded HTML page
  */
 
-const VERSION = '1.0.0';
+const VERSION = '1.3.0';
 const CACHE_NAME = `eternal-blossoms-v${VERSION}`;
 
 // Static assets to pre-cache on install (app shell)

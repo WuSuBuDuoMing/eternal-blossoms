@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-06-11
+
+### Added
+- Vitest test framework (`vitest.config.js`, `tests/cards.test.js`, `tests/layouts.test.js`, `tests/api.test.js`)
+- `npm test` and `npm run test:watch` scripts
+- JSDoc documentation on all main functions across 7 layout modes and 5 scene modes
+- Comprehensive scene mode documentation (bloom, memory, starlight, timeline, garden)
+- Layout algorithm documentation (ARRIVAL, FAN, GATHER, WAVE, GRID, SPIRAL, DEPART)
+
+### Changed
+- `server.js` now exports `app` for testability (`require.main === module` guard)
+- Service Worker cache version bumped to 1.3.0
+- README badges updated to v1.3.0
+- `package.json` version synchronized to 1.3.0
+
+### Removed
+- Duplicated scene mode logic from `app.js` (consolidated in `app-init.js`)
+- Corrupted test upload cards (IDs 37-39) from `cards.json` — had encoding errors, empty tags, empty descriptions
+- Dead `app.js` orchestrator code (~300 lines) — all logic lives in `app-init.js`
+
+### Fixed
+- Card data integrity: all 36 cards now have valid tags, descriptions, and proper encoding
+- Test suite: 77/77 tests passing (was 76/77 due to empty-tags card)
+
+---
+
 ## [1.2.0] - 2026-06-10
 
 ### Added
@@ -136,6 +162,7 @@ The first stable release of Eternal Blossoms -- a Three.js-powered immersive 3D 
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.3.0 | 2026-06-11 | Quality optimization: vitest, code dedup, JSDoc, dead code cleanup |
 | 1.2.0 | 2026-06-10 | Open-source release: English docs, CI, templates, LICENSE, npm publish |
 | 1.1.0 | 2026-06-08 | 100-round optimization: PWA, audio, analytics, security, i18n, themes, search, 7 layouts |
 | 1.0.0 | 2026-05-01 | Initial release: 3D gallery with 6 layouts, particles, 24 cards, Express API |

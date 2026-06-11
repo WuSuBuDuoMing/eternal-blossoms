@@ -65,10 +65,15 @@ class Layouts {
     return Math.sin(index * 127.1 + 311.7) * 43758.5453 % 1;
   }
 
-  // ================================================================
-  // 布局 1: ARRIVAL — 晨曦初临
-  // 卡片从远处飞入，在空间中散开
-  // ================================================================
+  /**
+   * 布局 1: ARRIVAL — 晨曦初临
+   * Cards spread in a circular pattern with vertical variation.
+   * Cards fly in from far away using deterministic pseudo-random offsets.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static ARRIVAL(index, total) {
     if (total <= 0) return { x: 0, y: 0, z: -8, rx: 0, ry: 0, rz: 0, scale: 1 };
     const angle = (index / total) * Math.PI * 2;
@@ -91,9 +96,14 @@ class Layouts {
     };
   }
 
-  // ================================================================
-  // 布局 2: FAN — 卷帘展开（手风琴扇形折叠）
-  // ================================================================
+  /**
+   * 布局 2: FAN — 卷帘展开 (Accordion fan fold)
+   * Cards arranged in a semicircular arc with alternating fold offsets.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static FAN(index, total) {
     if (total <= 1) return { x: 0, y: 0, z: -8, rx: 0, ry: 0, rz: 0, scale: 0.9 };
     const t = index / (total - 1); // 0 ~ 1
@@ -122,9 +132,14 @@ class Layouts {
     };
   }
 
-  // ================================================================
-  // 布局 3: GATHER — 同心汇聚（Fibonacci 球面分布）
-  // ================================================================
+  /**
+   * 布局 3: GATHER — 同心汇聚 (Fibonacci sphere distribution)
+   * Cards distributed on a sphere surface using Fibonacci spiral.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static GATHER(index, total) {
     // Fibonacci 球面分布
     const phi = Math.acos(1 - 2 * (index + 0.5) / total);
@@ -146,9 +161,14 @@ class Layouts {
     };
   }
 
-  // ================================================================
-  // 布局 4: GRID — 网格呼吸（Bernoulli 双纽线 ∞ 形）
-  // ================================================================
+  /**
+   * 布局 4: GRID — 网格呼吸 (Bernoulli lemniscate / figure-8)
+   * Cards trace a figure-8 curve with flattened vertical axis.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static GRID(index, total) {
     // Bernoulli 双纽线: r^2 = a^2 * cos(2*theta)
     const a = 5;
@@ -187,9 +207,14 @@ class Layouts {
     };
   }
 
-  // ================================================================
-  // 布局 5: SPIRAL — 螺旋花涡（三圈螺旋涡流）
-  // ================================================================
+  /**
+   * 布局 5: SPIRAL — 螺旋花涡 (Triple helix spiral)
+   * Cards arranged in a 3-turn spiral with contracting radius.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static SPIRAL(index, total) {
     const t = index / total;
     const spiralTurns = 3; // 三圈
@@ -217,9 +242,14 @@ class Layouts {
     };
   }
 
-  // ================================================================
-  // 布局 5b: WAVE — 正弦波动（沿X轴的正弦波排列）
-  // ================================================================
+  /**
+   * 布局 5b: WAVE — 正弦波动 (Sinusoidal wave along X-axis)
+   * Cards undulate vertically with cosine-based Z depth variation.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static WAVE(index, total) {
     const t = index / total;
     const x = (t - 0.5) * 20;
@@ -237,9 +267,15 @@ class Layouts {
     };
   }
 
-  // ================================================================
-  // 布局 6: DEPART — 永恒归宿（心形参数曲线环绕）
-  // ================================================================
+  /**
+   * 布局 6: DEPART — 永恒归宿 (Heart-shaped parametric curve)
+   * Cards trace a heart curve with variable-density mapping for smoother cusp regions.
+   * Z-depth varies based on curve derivative magnitude.
+   *
+   * @param {number} index - Card index (0-based)
+   * @param {number} total - Total number of cards
+   * @returns {{ x: number, y: number, z: number, rx: number, ry: number, rz: number, scale: number }}
+   */
   static DEPART(index, total) {
     // 变量密度映射：在心形顶部（cusp）分配更多点，使曲线更平滑
     // 先用均匀 t，再通过密度重映射让 cusp 附近（t=0 和 t=PI 区域）点更密集

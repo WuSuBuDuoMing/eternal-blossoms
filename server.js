@@ -92,15 +92,19 @@ app.use((err, req, res, _next) => {
 // ============================================================
 // 启动服务
 // ============================================================
-app.listen(PORT, () => {
-  console.log('');
-  console.log('  ╔══════════════════════════════════════════╗');
-  console.log('  ║                                          ║');
-  console.log('  ║     🌸 永恒花海 · 花海记忆 🌸            ║');
-  console.log('  ║     ETERNAL BLOSSOMS — HUA HAI JI YI     ║');
-  console.log('  ║                                          ║');
-  console.log(`  ║     http://localhost:${PORT}               ║`);
-  console.log('  ║                                          ║');
-  console.log('  ╚══════════════════════════════════════════╝');
-  console.log('');
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log('');
+    console.log('  ╔══════════════════════════════════════════╗');
+    console.log('  ║                                          ║');
+    console.log('  ║     🌸 永恒花海 · 花海记忆 🌸            ║');
+    console.log('  ║     ETERNAL BLOSSOMS — HUA HAI JI YI     ║');
+    console.log('  ║                                          ║');
+    console.log(`  ║     http://localhost:${PORT}               ║`);
+    console.log('  ║                                          ║');
+    console.log('  ╚══════════════════════════════════════════╝');
+    console.log('');
+  });
+}
+
+module.exports = app;
