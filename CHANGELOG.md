@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-06-14
+
+### Added
+- Security policy (SECURITY.md)
+- Documentation enhancements
+- Open-source best practices
+
+---
+
 ## [1.4.0] - 2026-06-14
 
 ### Changed
@@ -172,6 +181,7 @@ The first stable release of Eternal Blossoms -- a Three.js-powered immersive 3D 
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.6.0 | 2026-06-14 | Security policy, documentation enhancements, open-source best practices |
 | 1.4.0 | 2026-06-14 | Local optimization, CHANGELOG sync, npm package, open-source infrastructure |
 | 1.3.0 | 2026-06-11 | Quality optimization: vitest, code dedup, JSDoc, dead code cleanup |
 | 1.2.0 | 2026-06-10 | Open-source release: English docs, CI, templates, LICENSE, npm publish |
