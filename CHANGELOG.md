@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.11.0] - 2026-06-18
+
+### Added
+- Enhanced SECURITY.md with supported versions table, severity-based response timeline, security measures documentation, and disclosure policy
+- Expanded CODE_OF_CONDUCT.md to full Contributor Covenant v2.1 with enforcement guidelines (Correction, Warning, Temporary Ban, Permanent Ban)
+- Vitest test runner integrated into CI pipeline (`npm test` step)
+
+### Changed
+- package.json version bumped to 1.11.0
+- README.md version badge and latest version reference updated to v1.11.0
+- CI workflow test step switched from legacy `tests/test.js` to `vitest run`
+
+---
+
+## [1.10.0] - 2026-06-18
+
+### Added
+- Comprehensive JSDoc audit across all server-side route modules (api.js, cards-extra.js, upload.js)
+- JSDoc annotations on all public and private methods in scene.js, particles.js, layouts.js, ui.js, audio.js, analytics.js
+- File-level JSDoc comments on all JavaScript modules describing purpose and module responsibility
+
+### Changed
+- README architecture diagram updated to reflect actual file structure (app-init.js, gestures.js, i18n.js, search.js, share.js, themes.js, perf-monitor.js)
+
+---
+
+## [1.9.0] - 2026-06-18
+
+### Added
+- Community documentation suite: CONTRIBUTING.md (bilingual), CODE_OF_CONDUCT.md, SECURITY.md
+- GitHub Issue templates (Bug Report, Feature Request) and PR template
+- GitHub Sponsors funding configuration (FUNDING.yml)
+- CODEOWNERS file for automated code review assignments
+
+### Changed
+- README.md overhauled with complete Features, Installation, Usage, Architecture, API Reference, Keyboard Shortcuts, Customization, and Browser Compatibility sections
+- MIT LICENSE file verified and confirmed
+
+---
+
 ## [1.8.0] - 2026-06-16
 
 ### Added
@@ -189,6 +229,10 @@ The first stable release of Eternal Blossoms -- a Three.js-powered immersive 3D 
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.11.0 | 2026-06-18 | Community docs enhancements, JSDoc audit, CI branch fix, version bump |
+| 1.10.0 | 2026-06-18 | Comprehensive JSDoc audit, README architecture sync |
+| 1.9.0 | 2026-06-18 | Community docs suite, README overhaul, GitHub templates |
+| 1.8.0 | 2026-06-16 | Code of Conduct, Sponsors funding, CODEOWNERS, enhanced templates |
 | 1.6.0 | 2026-06-14 | Security policy, documentation enhancements, open-source best practices |
 | 1.4.0 | 2026-06-14 | Local optimization, CHANGELOG sync, npm package, open-source infrastructure |
 | 1.3.0 | 2026-06-11 | Quality optimization: vitest, code dedup, JSDoc, dead code cleanup |
