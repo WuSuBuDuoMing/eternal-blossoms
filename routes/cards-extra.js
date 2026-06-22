@@ -416,6 +416,55 @@ router.post('/validate-favorites', (req, res) => {
 });
 
 // ============================================================
+// v1.15.0 — POST /favorites
+// ============================================================
+
+/**
+ * POST /favorites
+ * v1.15.0: Alternative to GET /favorites — accepts JSON body
+ * Body: { ids: [1, 2, 3] }
+ * Returns favorite cards matching the provided IDs
+ */
+router.post('/favorites', (req, res) => {
+  const { ids } = req.body || {};
+
+  if (!Array.isArray(ids)) {
+    return fail(res, 'ids 必须为数组', 400);
+  }
+
+  if (ids.length === 0) {
+    return fail(res, 'ids 不能为空', 400);
+  }
+
+  const validIds = [];
+  const invalidIds = [];
+
+  ids.forEach(item => {
+    if (Number.isInteger(item) && item >= 1) {
+      validIds.push(item);
+    } else {
+      invalidIds.push(item);
+    }
+  });
+
+  if (validIds.length === 0) {
+    return fail(res, 'ids 中没有有效的 ID', 400);
+  }
+
+  const idSet = new Set(validIds);
+  const matched = cards.filter(c => idSet.has(c.id));
+  const foundIds = new Set(matched.map(c => c.id));
+  const missingIds = validIds.filter(id => !foundIds.has(id));
+
+  return ok(res, {
+    count: matched.length,
+    data: matched,
+    ...(invalidIds.length > 0 ? { invalidIds } : {}),
+    ...(missingIds.length > 0 ? { missingIds } : {})
+  });
+});
+
+// ============================================================
 // 导出
 // ============================================================
 module.exports = router;

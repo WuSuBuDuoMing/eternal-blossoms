@@ -273,8 +273,20 @@ class ParticleSystem {
 
   /** 动画循环（外部调用） */
   render() {
+    if (!this.enabled && !this.constantGlow) return;
     this._update();
     this._draw();
+  }
+
+  /**
+   * v1.15.0: Dispose all resources (canvas context, glow sprite, particle arrays)
+   * Prevents memory leaks when hot-reloading or tearing down.
+   */
+  dispose() {
+    this.particles = [];
+    this.burstParticles = [];
+    this._glowSprite = null;
+    this.enabled = false;
   }
 
   /** 设置 enabled 状态 */

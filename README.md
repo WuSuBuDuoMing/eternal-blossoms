@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Express-4.18-red?logo=express&logoColor=white" alt="Express 4.18">
   <img src="https://img.shields.io/badge/WebGL-Required-orange" alt="WebGL Required">
   <img src="https://img.shields.io/badge/PWA-Enabled-purple" alt="PWA Enabled">
-  <img src="https://img.shields.io/badge/stable-v1.14.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/stable-v1.17.0-blue" alt="Version">
 </p>
 
 ---

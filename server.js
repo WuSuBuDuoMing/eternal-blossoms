@@ -13,6 +13,9 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+// v1.16.0: Request body size limit — configurable via env
+const BODY_LIMIT = process.env.BODY_LIMIT || '10mb';
+
 // ============================================================
 // 中间件
 // ============================================================
@@ -41,7 +44,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '10mb' })); // 10mb for photo uploads
+app.use(express.json({ limit: BODY_LIMIT })); // configurable limit for photo uploads
 
 // CORS 支持（可通过 CORS_ORIGIN 环境变量控制）
 app.use((req, res, next) => {
@@ -51,6 +54,14 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
+
+// v1.15.0: Performance — HSTS header for production
+if (IS_PROD) {
+  app.use((req, res, next) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+  });
+}
 
 // v1.12.0: Compression for text-based responses
 // Only in production to avoid interfering with dev tools

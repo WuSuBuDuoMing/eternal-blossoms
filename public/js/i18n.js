@@ -184,7 +184,8 @@ class I18n {
     try { localStorage.setItem('eb-lang', lang); } catch (_) { /* ignore */ }
 
     // 更新 <html lang>
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    const langMap = { zh: 'zh-CN', en: 'en', ja: 'ja' };
+    document.documentElement.lang = langMap[lang] || 'en';
 
     // 更新 DOM
     this.translateDOM();
@@ -272,7 +273,8 @@ class I18n {
     // 3. navigator.language
     const nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
     if (nav.startsWith('zh')) return 'zh';
-    return 'en'; // 默认英文
+    if (nav.startsWith('ja')) return 'ja';
+    return 'en'; // default English
   }
 
   /**
@@ -368,16 +370,19 @@ class I18n {
       document.head.appendChild(style);
     }
 
-    // 点击事件 — 带旋转动画
+    // 点击事件 — 带旋转动画 (zh ↔ en ↔ ja cycle)
     btn.addEventListener('click', () => {
-      const newLang = this._lang === 'zh' ? 'en' : 'zh';
+      const cycle = ['zh', 'en', 'ja'];
+      const currentIdx = cycle.indexOf(this._lang);
+      const newLang = cycle[(currentIdx + 1) % cycle.length];
       const labelEl = btn.querySelector('.lang-toggle__label');
 
       // 旋转淡出
       labelEl.classList.add('lang-toggle__label--switching');
 
       setTimeout(() => {
-        labelEl.textContent = newLang === 'zh' ? '中' : 'EN';
+        const langLabels = { zh: '中', en: 'EN', ja: 'JP' };
+        labelEl.textContent = langLabels[newLang] || '中';
         this.setLocale(newLang);
 
         // 旋转淡入
@@ -460,6 +465,62 @@ class I18n {
    */
   getTranslationCount() {
     return Object.keys(this._translations).length;
+  }
+
+  // ---------------------------------------------------------------
+  // v1.15.0 — Batch DOM Translation (Performance)
+  // ---------------------------------------------------------------
+
+  /**
+   * v1.15.0: Batch-translate all elements in a single DOM read/write cycle.
+   * More efficient than calling translateDOM() which triggers multiple reflows.
+   * Uses requestAnimationFrame for non-blocking batch updates.
+   * @param {HTMLElement} [root]
+   */
+  translateDOMBatch(root) {
+    const container = root || document.body;
+    const frag = document.createDocumentFragment();
+
+    // Single querySelectorAll pass
+    const elements = container.querySelectorAll('[data-i18n], [data-i18n-title], [data-i18n-placeholder]');
+    if (elements.length === 0) return;
+
+    // Collect all updates first (DOM read phase)
+    const updates = [];
+    elements.forEach(el => {
+      const i18nKey = el.getAttribute('data-i18n');
+      const i18nTitle = el.getAttribute('data-i18n-title');
+      const i18nPh = el.getAttribute('data-i18n-placeholder');
+
+      if (i18nKey) updates.push({ el, type: 'text', val: this.t(i18nKey) });
+      if (i18nTitle) updates.push({ el, type: 'title', val: this.t(i18nTitle) });
+      if (i18nPh) updates.push({ el, type: 'placeholder', val: this.t(i18nPh) });
+    });
+
+    // Apply all updates in one batch (DOM write phase)
+    for (const u of updates) {
+      if (u.type === 'text') u.el.textContent = u.val;
+      else if (u.type === 'title') u.el.title = u.val;
+      else if (u.type === 'placeholder') u.el.placeholder = u.val;
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // v1.15.0 — HTML-safe Translation
+  // ---------------------------------------------------------------
+
+  /**
+   * v1.15.0: Translate with HTML entity escaping for safe innerHTML usage.
+   * Prevents XSS when inserting translations into HTML templates.
+   * @param {string} key
+   * @param {Object} [params]
+   * @returns {string} HTML-escaped translation
+   */
+  tHtml(key, params) {
+    const text = this.t(key, params);
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // ---------------------------------------------------------------

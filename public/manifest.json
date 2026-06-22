@@ -18,5 +18,22 @@
       "type": "image/svg+xml"
     }
   ],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "id": "/",
+  "shortcuts": [
+    {
+      "name": "上传照片",
+      "short_name": "上传",
+      "url": "/upload.html",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dominant-baseline='central'%3E📸%3C/text%3E%3C/svg%3E",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "screenshots": [],
+  "edge_side_panel": {}
 }

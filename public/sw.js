@@ -6,7 +6,7 @@
  *           background sync for API, improved cache lifecycle
  */
 
-const VERSION = '1.14.0';
+const VERSION = '1.17.0';
 const CACHE_NAME = `eternal-blossoms-v${VERSION}`;
 const RUNTIME_CACHE = `eternal-blossoms-runtime-v${VERSION}`;
 const IMAGE_CACHE = `eternal-blossoms-images-v${VERSION}`;
@@ -89,6 +89,7 @@ const OFFLINE_HTML = `<!DOCTYPE html>
 
 // ---------------------------------------------------------------------------
 // R40 - Install: pre-cache app shell
+// v1.16.0: Enable Navigation Preload for faster page loads
 // ---------------------------------------------------------------------------
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -100,8 +101,10 @@ self.addEventListener('install', (event) => {
 
 // ---------------------------------------------------------------------------
 // R40 - Activate: clean up old caches
+// v1.16.0: Enable Navigation Preload after cleanup
 // ---------------------------------------------------------------------------
 self.addEventListener('activate', (event) => {
+  const PRELOAD_KEY = 'eb-navigation-preload';
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
@@ -115,6 +118,11 @@ self.addEventListener('activate', (event) => {
         trimCache(RUNTIME_CACHE, MAX_RUNTIME_ENTRIES),
         trimCache(IMAGE_CACHE, MAX_IMAGE_ENTRIES),
       ]);
+    }).then(() => {
+      // v1.16.0: Enable navigation preload if supported
+      if (self.registration && self.registration.navigationPreload) {
+        return self.registration.navigationPreload.enable();
+      }
     }).then(() => self.clients.claim())
   );
 });

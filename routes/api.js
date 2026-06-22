@@ -44,12 +44,19 @@ function sendWithETag(req, res, payload) {
 /**
  * GET /api/health
  * 健康检查端点
+ * v1.15.0: Added memory usage and version info
  */
 router.get('/health', (req, res) => {
+  const memUsage = process.memoryUsage();
   res.json({
     status: 'ok',
     uptime: process.uptime(),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    version: require('../../package.json').version,
+    memory: {
+      rss: Math.round(memUsage.rss / 1024 / 1024) + ' MB',
+      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + ' MB',
+    },
   });
 });
 
@@ -66,6 +73,19 @@ router.get('/cards', (req, res) => {
     count: cards.length,
     data: cards
   });
+});
+
+/**
+ * v1.15.0: HEAD /api/cards
+ * Returns only headers (no body) — useful for cache validation
+ */
+router.head('/cards', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300');
+  const jsonStr = JSON.stringify({ count: cards.length });
+  const hash = generateETag(jsonStr);
+  res.set('ETag', '"' + hash + '"');
+  res.set('X-Card-Count', String(cards.length));
+  res.status(200).end();
 });
 
 /**

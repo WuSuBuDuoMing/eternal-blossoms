@@ -842,6 +842,32 @@ class SceneManager {
   }
 
   /**
+   * v1.15.0: Dispose all GPU resources (geometries, materials, textures, renderer)
+   * Prevents WebGL context leaks on teardown or hot-reload.
+   */
+  dispose() {
+    // Dispose card meshes
+    this.cards.forEach(c => {
+      c.material.map?.dispose();
+      c.material.dispose();
+    });
+    this.cards = [];
+
+    // Dispose ambient glow particles
+    this.ambientParticles.forEach(ap => {
+      ap.geo.dispose();
+      ap.mat.dispose();
+    });
+    this.ambientParticles = [];
+
+    // Dispose renderer
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
+  }
+
+  /**
    * 渲染循环（外部调用）
    */
   render() {

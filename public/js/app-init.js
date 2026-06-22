@@ -678,11 +678,18 @@
       // Update UI
       if (ui) ui.update();
 
-      // Compute layout positions
-      const positions = Layouts.computePositions(ui ? ui.globalProgress : 0, cardsData.length);
+      // v1.15.0: Skip layout computation when progress hasn't changed
+      const currentProgress = ui ? ui.globalProgress : 0;
+      if (Math.abs(currentProgress - (state._lastComputedProgress || 0)) > 0.0001 || cardsData.length !== (state._lastComputedCount || 0)) {
+        // Compute layout positions
+        const positions = Layouts.computePositions(currentProgress, cardsData.length);
 
-      // Update card positions in scene
-      if (scene) scene.updateCardPositions(positions);
+        // Update card positions in scene
+        if (scene) scene.updateCardPositions(positions);
+
+        state._lastComputedProgress = currentProgress;
+        state._lastComputedCount = cardsData.length;
+      }
 
       // Render Three.js scene
       if (scene) scene.render();

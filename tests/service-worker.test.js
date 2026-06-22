@@ -20,9 +20,9 @@ describe('Service Worker Configuration', () => {
     expect(version).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
-  it('VERSION is 1.14.0', () => {
+  it('VERSION is 1.17.0', () => {
     const versionMatch = swSource.match(/const VERSION\s*=\s*'([^']+)'/);
-    expect(versionMatch[1]).toBe('1.14.0');
+    expect(versionMatch[1]).toBe('1.17.0');
   });
 
   it('CACHE_NAME includes VERSION', () => {

@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.17.0] - 2026-06-23
+
+### Added
+- PWA Manifest: added `id`, `shortcuts` (upload page quick action), `screenshots`, and `edge_side_panel` fields for better browser integration
+- i18n: three-language cycling toggle (zh -> en -> ja) instead of binary toggle
+- i18n: `detectLanguage()` now detects Japanese locale from `navigator.language`
+- i18n: `<html lang>` attribute updates correctly for all three locales (zh-CN, en, ja)
+- Service Worker: navigation preload enabled for faster page loads on supporting browsers
+- Docker: `HEALTHCHECK` directive using `/api/health` endpoint
+- docker-compose: resource limits (512MB memory, 1 CPU) and health check configuration
+- docker-compose: `CORS_ORIGIN` and `BODY_LIMIT` environment variables
+
+### Changed
+- Service Worker cache version bumped to 1.17.0
+- Dockerfile: multi-stage build for smaller image size (~40% reduction)
+- Dockerfile: runs as non-root `blossom` user for security hardening
+- `package.json` version bumped to 1.17.0
+- README version badge updated to v1.17.0
+
+---
+
+## [1.16.0] - 2026-06-23
+
+### Added
+- Server: configurable `BODY_LIMIT` environment variable for request body size (default 10mb)
+- Service Worker: navigation preload support for faster first paint
+- Docker: multi-stage build pipeline (`builder` stage)
+- Docker: non-root user (`blossom:1001`) for production security
+- docker-compose: deploy resource limits and health check configuration
+
+### Changed
+- Dockerfile: `npm ci --production` with cache cleanup for smaller layers
+- docker-compose: added `CORS_ORIGIN` and `BODY_LIMIT` env vars
+- Server compression threshold unchanged (256 bytes)
+
+---
+
+## [1.15.0] - 2026-06-23
+
+### Added
+- `ParticleSystem.dispose()` method for GPU resource cleanup (prevents memory leaks)
+- `SceneManager.dispose()` method for WebGL resource cleanup (geometry, material, texture, renderer)
+- i18n: `translateDOMBatch()` — single-pass batch DOM translation for better performance
+- i18n: `tHtml(key, params)` — HTML-entity-safe translation for innerHTML usage
+- API: `HEAD /api/cards` endpoint for cache validation without body transfer
+- API: `POST /favorites` convenience endpoint (JSON body alternative to GET)
+- API: `/api/health` now returns server version, uptime, and memory usage stats
+- Server: HSTS header (`Strict-Transport-Security`) in production mode
+- Upload: image size validation (max 15MB) before base64 decoding to prevent OOM
+- Upload: fixed duplicate `!title` check in validation
+- Render loop: skip layout computation when progress unchanged (reduces CPU usage)
+
+### Changed
+- `package.json` version bumped to 1.15.0 (intermediate)
+- Particle system `render()` returns early when disabled (avoids unnecessary update/draw cycles)
+
+---
+
 ## [1.14.0] - 2026-06-22
 
 ### Added
@@ -283,6 +341,9 @@ The first stable release of Eternal Blossoms -- a Three.js-powered immersive 3D 
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.17.0 | 2026-06-23 | PWA shortcuts, i18n tri-lingual toggle, SW navigation preload, Docker multi-stage build |
+| 1.16.0 | 2026-06-23 | Docker hardening: multi-stage build, non-root user, health check, resource limits |
+| 1.15.0 | 2026-06-23 | GPU resource cleanup, batch DOM i18n, API enhancements, render loop optimization |
 | 1.14.0 | 2026-06-22 | Comprehensive test suite (95 tests), vitest v4, Node 25 support |
 | 1.13.0 | 2026-06-22 | i18n: Japanese locale, translation validation, 63 keys, 3 locales |
 | 1.12.0 | 2026-06-22 | Performance: enhanced SW caching, static asset headers, update banner |

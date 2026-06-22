@@ -109,11 +109,16 @@ router.post('/upload', (req, res) => {
     const { title, titleEn, desc, category, tags, image, emoji, color } = req.body;
 
     // 校验必填字段
-    if (!title || !title || !title.trim()) {
+    if (!title || !title.trim()) {
       return fail(res, '缺少必填字段: title', 400);
     }
     if (!image || !image.trim()) {
       return fail(res, '缺少必填字段: image', 400);
+    }
+
+    // v1.15.0: Validate image size before decoding (prevent OOM)
+    if (image.length > 20 * 1024 * 1024) {
+      return fail(res, '图片数据过大，最大 15 MB', 413);
     }
 
     // 确保目录存在

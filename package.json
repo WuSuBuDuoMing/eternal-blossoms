@@ -1,6 +1,6 @@
 {
   "name": "eternal-blossoms",
-  "version": "1.14.0",
+  "version": "1.17.0",
   "description": "Immersive 3D photo card gallery built with Three.js, Express, and Canvas 2D",
   "main": "server.js",
   "scripts": {
