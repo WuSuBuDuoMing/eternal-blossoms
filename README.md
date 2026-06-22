@@ -105,6 +105,70 @@ open http://localhost:3002
 npm run dev
 ```
 
+### Platform-Specific Installation
+
+#### macOS
+
+```bash
+# Install Node.js via Homebrew
+brew install node
+
+# Clone and start
+git clone https://github.com/WuSuBuDuoMing/eternal-blossoms.git
+cd eternal-blossoms
+npm install
+npm start
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+# Install Node.js via package manager
+sudo apt update
+sudo apt install nodejs npm
+
+# Clone and start
+git clone https://github.com/WuSuBuDuoMing/eternal-blossoms.git
+cd eternal-blossoms
+npm install
+npm start
+```
+
+#### Windows
+
+1. Download and install [Node.js](https://nodejs.org/) (>= 16.0) from the official website.
+2. Open **PowerShell** or **Command Prompt**:
+
+```powershell
+git clone https://github.com/WuSuBuDuoMing/eternal-blossoms.git
+cd eternal-blossoms
+npm install
+npm start
+```
+
+#### Docker
+
+```bash
+# Build the image
+docker build -t eternal-blossoms .
+
+# Run the container
+docker run -d -p 3002:3002 --name eternal-blossoms eternal-blossoms
+```
+
+#### Docker Compose
+
+```bash
+# Start in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
 ### Environment Variables
 
 | Variable | Default | Description |
