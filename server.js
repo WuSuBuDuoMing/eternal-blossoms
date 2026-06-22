@@ -11,6 +11,7 @@ const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 // ============================================================
 // 中间件
@@ -51,6 +52,23 @@ app.use((req, res, next) => {
   next();
 });
 
+// v1.12.0: Compression for text-based responses
+// Only in production to avoid interfering with dev tools
+if (IS_PROD) {
+  try {
+    const compression = require('compression');
+    app.use(compression({
+      filter: (req, res) => {
+        if (req.headers['x-no-compression']) return false;
+        return compression.filter(req, res);
+      },
+      threshold: 256, // Only compress responses > 256 bytes
+    }));
+  } catch (_) {
+    // compression not installed — gracefully skip
+  }
+}
+
 // ============================================================
 // 路由
 // ============================================================
@@ -60,13 +78,29 @@ app.use('/api', apiRoutes);
 app.use('/api', cardsExtra);
 app.use('/api', uploadRoutes);
 
-// 静态文件服务 — public 目录（开发环境禁用缓存）
+// 静态文件服务 — public 目录
+// 生产环境: 启用 ETag + 长缓存（配合 Service Worker 版本化更新）
+// 开发环境: 禁用缓存便于调试
 app.use(express.static(path.join(__dirname, 'public'), {
-  etag: false,
-  lastModified: false,
+  etag: true,
+  lastModified: true,
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
+      // HTML: no-cache to ensure fresh navigation
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    } else if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      // JS/CSS: long cache with revalidation (SW handles versioning)
+      res.set('Cache-Control', IS_PROD
+        ? 'public, max-age=31536000, immutable'
+        : 'no-cache');
+    } else if (/\.(jpg|jpeg|png|gif|webp|svg|ico)$/i.test(filePath)) {
+      // Images: long cache
+      res.set('Cache-Control', IS_PROD
+        ? 'public, max-age=2592000'
+        : 'no-cache');
+    } else if (filePath.endsWith('.json')) {
+      // JSON: moderate cache
+      res.set('Cache-Control', 'public, max-age=300');
     }
   }
 }));

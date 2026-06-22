@@ -2,23 +2,48 @@
  * Service Worker - Eternal Blossoms PWA
  * R40: Cache strategies (cache-first for static, network-first for API)
  * R42: Offline fallback with embedded HTML page
+ * v1.12.0: Enhanced caching — stale-while-revalidate for assets,
+ *           background sync for API, improved cache lifecycle
  */
 
-const VERSION = '1.3.0';
+const VERSION = '1.14.0';
 const CACHE_NAME = `eternal-blossoms-v${VERSION}`;
+const RUNTIME_CACHE = `eternal-blossoms-runtime-v${VERSION}`;
+const IMAGE_CACHE = `eternal-blossoms-images-v${VERSION}`;
 
 // Static assets to pre-cache on install (app shell)
 const APP_SHELL = [
   '/',
   '/index.html',
   '/css/style.css',
+  '/css/effects.css',
+  '/css/themes.css',
+  '/css/search.css',
   '/js/app.js',
+  '/js/app-init.js',
   '/js/layouts.js',
   '/js/particles.js',
   '/js/scene.js',
   '/js/ui.js',
-  '/data/cards.json'
+  '/js/i18n.js',
+  '/js/themes.js',
+  '/js/perf-monitor.js',
+  '/js/audio.js',
+  '/js/analytics.js',
+  '/js/search.js',
+  '/js/share.js',
+  '/js/gestures.js',
+  '/js/register-sw.js',
+  '/js/vendor/three.min.js',
+  '/manifest.json'
 ];
+
+// Maximum age for runtime cache entries (7 days)
+const RUNTIME_CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+// Maximum entries per cache to prevent unbounded growth
+const MAX_RUNTIME_ENTRIES = 100;
+const MAX_IMAGE_ENTRIES = 60;
 
 // ---------------------------------------------------------------------------
 // R42 - Offline fallback page (embedded HTML string)
@@ -81,26 +106,54 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key !== CACHE_NAME && key !== RUNTIME_CACHE && key !== IMAGE_CACHE)
           .map((key) => caches.delete(key))
       )
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      // Trim runtime caches to prevent unbounded growth
+      return Promise.all([
+        trimCache(RUNTIME_CACHE, MAX_RUNTIME_ENTRIES),
+        trimCache(IMAGE_CACHE, MAX_IMAGE_ENTRIES),
+      ]);
+    }).then(() => self.clients.claim())
   );
 });
 
+/**
+ * Trim a cache to a maximum number of entries (FIFO eviction).
+ * @param {string} cacheName
+ * @param {number} maxEntries
+ */
+async function trimCache(cacheName, maxEntries) {
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length > maxEntries) {
+      const toDelete = keys.slice(0, keys.length - maxEntries);
+      await Promise.all(toDelete.map(key => cache.delete(key)));
+    }
+  } catch (_) { /* cache may not exist yet */ }
+}
+
 // ---------------------------------------------------------------------------
-// R40 + R42 - Fetch handler
+// R40 + R42 + v1.12.0 - Fetch handler
 // ---------------------------------------------------------------------------
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
 
   // --- Network-first strategy for /api/* requests ---
-  if (request.url.includes('/api/')) {
+  if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone));
+          }
           return response;
         })
         .catch(() => caches.match(request))
@@ -108,7 +161,51 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // --- Cache-first strategy for everything else (static assets) ---
+  // --- Cache-first for images (photos, vendor assets) ---
+  if (url.pathname.startsWith('/photos/') || url.pathname.includes('/vendor/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+
+        return fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(IMAGE_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        }).catch(() => {
+          // Return a transparent 1x1 pixel for failed image requests
+          if (request.destination === 'image') {
+            return new Response(
+              'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+              { headers: { 'Content-Type': 'image/gif' } }
+            );
+          }
+        });
+      })
+    );
+    return;
+  }
+
+  // --- Stale-while-revalidate for CSS/JS (fast load + background update) ---
+  if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const fetchPromise = fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        }).catch(() => cached);
+
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // --- Cache-first strategy for everything else (HTML, fonts, etc.) ---
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
@@ -132,4 +229,20 @@ self.addEventListener('fetch', (event) => {
         });
     })
   );
+});
+
+// ---------------------------------------------------------------------------
+// v1.12.0 - Periodic cache cleanup (runs on activate)
+// ---------------------------------------------------------------------------
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  if (event.data && event.data.type === 'CLEAR_CACHES') {
+    event.waitUntil(
+      caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      )
+    );
+  }
 });

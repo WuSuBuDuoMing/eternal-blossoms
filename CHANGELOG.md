@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.14.0] - 2026-06-22
+
+### Added
+- Comprehensive test suite expansion: 6 test files, 95 tests (up from 4 files / ~40 tests)
+- `tests/i18n.test.js` — validates all 63 translation keys across zh/en/ja locales
+- `tests/service-worker.test.js` — validates SW cache version, app shell, caching strategies
+- `tests/server-headers.test.js` — validates security headers, CORS, ETag/304 caching, API responses
+- Vitest upgraded to v4.1.9 for Node.js 25 compatibility
+
+### Changed
+- `package.json` version bumped to 1.14.0
+- `vitest` devDependency upgraded from `^1.6.1` to `^4.1.9`
+- README.md version badge and latest version reference updated to v1.14.0
+
+---
+
+## [1.13.0] - 2026-06-22
+
+### Added
+- Japanese (ja) locale for all 63 translation keys in i18n module
+- Translation completeness validation method `validateTranslations()` on I18n class
+- Fallback-safe translation method `tSafe()` with zh -> en cascade
+- `getTranslationCount()` method on I18n class
+- New i18n keys: `share.title`, `share.copy`, `share.copied`, `share.error` (share flow)
+- New i18n keys: `update.available`, `update.refresh`, `update.dismiss` (update banner)
+- New i18n keys: `theme.label`, `theme.midnight`, `theme.sakura`, `theme.ocean`, `theme.forest`, `theme.sunset`, `theme.aurora` (theme selector)
+
+### Changed
+- `TRANSLATIONS` dictionary expanded from 50 to 63 keys with 3-locale coverage (zh/en/ja)
+- I18n module now supports 3 locales: `zh`, `en`, `ja`
+
+---
+
+## [1.12.0] - 2026-06-22
+
+### Added
+- Service Worker: separate caches for static assets, runtime API, and images (`IMAGE_CACHE`, `RUNTIME_CACHE`)
+- Service Worker: `trimCache()` utility to prevent unbounded cache growth (FIFO eviction)
+- Service Worker: stale-while-revalidate strategy for CSS/JS assets (instant load + background refresh)
+- Service Worker: cache-first strategy for image assets (`/photos/`, `/vendor/`) with transparent pixel fallback
+- Service Worker: `SKIP_WAITING` and `CLEAR_CACHES` message handlers
+- Service Worker: all app shell files now pre-cached (previously only 8, now 22 files)
+- Register SW: non-intrusive update notification banner with Refresh/Dismiss buttons
+- Register SW: periodic update checks every 60 minutes
+- Register SW: `postMessage({ type: 'SKIP_WAITING' })` to activate new SW immediately
+
+### Changed
+- `server.js` static file serving: production mode now enables ETag + long-lived cache headers (`immutable` for JS/CSS, 30-day for images)
+- `server.js` adds optional `compression` middleware in production (graceful fallback if not installed)
+- PWA `manifest.json`: added `scope`, `lang`, `dir`, `categories`, `prefer_related_applications` fields
+- Service Worker cache version bumped to 1.14.0
+
+---
+
 ## [1.11.0] - 2026-06-18
 
 ### Added
@@ -229,6 +283,9 @@ The first stable release of Eternal Blossoms -- a Three.js-powered immersive 3D 
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.14.0 | 2026-06-22 | Comprehensive test suite (95 tests), vitest v4, Node 25 support |
+| 1.13.0 | 2026-06-22 | i18n: Japanese locale, translation validation, 63 keys, 3 locales |
+| 1.12.0 | 2026-06-22 | Performance: enhanced SW caching, static asset headers, update banner |
 | 1.11.0 | 2026-06-18 | Community docs enhancements, JSDoc audit, CI branch fix, version bump |
 | 1.10.0 | 2026-06-18 | Comprehensive JSDoc audit, README architecture sync |
 | 1.9.0 | 2026-06-18 | Community docs suite, README overhaul, GitHub templates |

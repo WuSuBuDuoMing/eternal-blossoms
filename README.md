@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Express-4.18-red?logo=express&logoColor=white" alt="Express 4.18">
   <img src="https://img.shields.io/badge/WebGL-Required-orange" alt="WebGL Required">
   <img src="https://img.shields.io/badge/PWA-Enabled-purple" alt="PWA Enabled">
-  <img src="https://img.shields.io/badge/stable-v1.11.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/stable-v1.14.0-blue" alt="Version">
 </p>
 
 ---
@@ -366,7 +366,7 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for de
 
 For a detailed version history, see [CHANGELOG.md](CHANGELOG.md).
 
-**Latest version: v1.11.0** &mdash; Community docs overhaul, README improvements, JSDoc enhancements, CI workflow updates, npm audit fixes.
+**Latest version: v1.14.0** &mdash; Performance optimizations (enhanced SW caching, static asset headers), i18n with Japanese locale and translation validation, comprehensive test suite (95 tests), PWA manifest improvements.
 
 ---
 
