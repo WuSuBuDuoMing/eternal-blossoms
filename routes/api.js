@@ -52,7 +52,7 @@ router.get('/health', (req, res) => {
     status: 'ok',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
-    version: require('../../package.json').version,
+    version: require('../package.json').version,
     memory: {
       rss: Math.round(memUsage.rss / 1024 / 1024) + ' MB',
       heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + ' MB',
